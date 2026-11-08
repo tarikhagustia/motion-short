@@ -1,0 +1,17 @@
+/* LUKIS: painterly oil-paint scenes drawn on a canvas by paint.js. Classic serif titles, plain serif captions. */
+#stage { background: #0b0a12; }
+#paint { position: absolute; inset: 0; width: 1080px; height: 1920px; }
+.title { font-family: "Cormorant Garamond", serif; font-weight: 600; letter-spacing: .02em; }
+.title.cream { color: #f6ead2; text-shadow: 0 4px 22px rgba(0,0,0,.65), 0 1px 2px rgba(0,0,0,.6); }
+.title.gold  { color: #f2c46a; text-shadow: 0 0 24px rgba(255,170,70,.45), 0 3px 10px rgba(0,0,0,.7); }
+.title.caps { text-transform: uppercase; letter-spacing: .08em; }
+.title .sub { font-size: .26em; letter-spacing: .32em; text-transform: uppercase; color: #e9d7b4; font-weight: 600; }
+.tag { padding: 0; background: none; color: #f0e2c4; font-family: "Cormorant Garamond", serif; font-weight: 600;
+  font-size: 40px; letter-spacing: .3em; text-transform: uppercase; text-shadow: 0 3px 12px rgba(0,0,0,.8); }
+#caption .box { font-family: "Cormorant Garamond", serif; font-weight: 700; font-size: 64px; line-height: 1.15; }
+#caption.serif .box { color: #fbf3e4; text-shadow: 0 3px 14px rgba(0,0,0,.85), 0 1px 3px rgba(0,0,0,.9); }
+#caption .w.todo { color: rgba(251, 243, 228, .5); }
+#caption .w.key.done, #caption .w.key.now { color: #f2b85a; }
+/* scary mode (paint.scary): fire-red title + keywords */
+.scary .title.gold { color: #ff7a3c; text-shadow: 0 0 30px rgba(255,60,20,.7), 0 0 8px rgba(255,120,60,.6), 0 3px 10px rgba(0,0,0,.8); }
+.scary #caption .w.key.done, .scary #caption .w.key.now { color: #ff6a3a; }

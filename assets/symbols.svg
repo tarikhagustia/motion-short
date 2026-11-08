@@ -1,0 +1,211 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+  <!-- Reusable flat illustration pieces. Use in scene SVGs with
+       <use href="#NAME" x=".." y=".." width=".." height=".."/>
+       Colours can be overridden with CSS variables on the <use>, e.g. style="--a:#7a8f6a;--b:#5e7352". -->
+
+  <symbol id="cloud" viewBox="0 0 400 180">
+    <path d="M40 150 Q10 150 14 122 Q20 92 58 98 Q62 54 110 52 Q140 10 196 22 Q238 0 270 40 Q320 30 340 72 Q392 76 388 118 Q386 150 350 150 Z" fill="var(--a,#f4eee2)"/>
+    <path d="M40 150 Q10 150 14 122 Q60 134 120 128 Q220 140 300 126 Q370 118 388 118 Q386 150 350 150 Z" fill="var(--b,#d9cfbf)"/>
+  </symbol>
+
+  <symbol id="cloud-streak" viewBox="0 0 600 60">
+    <path d="M20 40 Q60 14 130 22 Q200 6 290 20 Q380 8 460 24 Q540 18 590 38 Q520 50 400 46 Q260 54 140 48 Q60 50 20 40Z" fill="var(--a,#efe6d6)" opacity=".9"/>
+  </symbol>
+
+  <symbol id="bird" viewBox="0 0 60 24">
+    <path d="M2 14 Q16 2 30 14 Q44 2 58 14 Q44 8 30 18 Q16 8 2 14Z" fill="var(--a,#3b302a)"/>
+  </symbol>
+
+  <symbol id="sun" viewBox="0 0 200 200">
+    <circle cx="100" cy="100" r="96" fill="var(--b,#f6e2b0)" opacity=".45"/>
+    <circle cx="100" cy="100" r="70" fill="var(--a,#f3d48a)"/>
+  </symbol>
+
+  <symbol id="mountain" viewBox="0 0 800 400">
+    <path d="M0 400 L300 60 Q330 30 360 60 L800 400Z" fill="var(--a,#8c8f7a)"/>
+    <path d="M330 45 Q345 36 360 60 L800 400 L470 400 L420 250 L380 210 Z" fill="var(--b,#74776a)"/>
+    <path d="M300 60 Q330 30 360 60 L392 96 L366 90 L346 108 L326 88 L298 104 L282 82Z" fill="var(--c,#efe9dc)"/>
+  </symbol>
+
+  <symbol id="volcano" viewBox="0 0 800 420">
+    <path d="M0 420 L310 70 L350 58 L390 70 L800 420Z" fill="var(--a,#7d7468)"/>
+    <path d="M350 58 L390 70 L800 420 L520 420 L440 240 L400 150Z" fill="var(--b,#655d54)"/>
+    <path d="M310 70 L350 58 L390 70 L376 80 L352 74 L326 82Z" fill="var(--c,#3e3732)"/>
+    <path d="M340 90 L330 170 M372 110 L392 200 M300 140 L280 230" stroke="var(--b,#655d54)" stroke-width="6" fill="none" opacity=".7"/>
+  </symbol>
+
+  <symbol id="hill" viewBox="0 0 1200 300">
+    <path d="M0 300 L0 170 Q200 60 420 120 Q640 180 860 90 Q1060 20 1200 110 L1200 300Z" fill="var(--a,#7f8f5e)"/>
+    <path d="M0 300 L0 230 Q300 160 600 210 Q900 250 1200 190 L1200 300Z" fill="var(--b,#6b7b4e)"/>
+  </symbol>
+
+  <symbol id="palm" viewBox="0 0 220 420">
+    <path d="M104 420 Q96 300 112 150 L122 150 Q110 300 120 420Z" fill="var(--c,#6a5440)"/>
+    <g fill="var(--a,#4f6b3d)">
+      <path d="M116 150 Q60 100 0 128 Q60 112 116 158Z"/>
+      <path d="M116 150 Q170 96 220 126 Q166 112 116 160Z"/>
+      <path d="M116 150 Q90 70 30 52 Q96 84 112 156Z"/>
+      <path d="M116 150 Q150 66 204 54 Q144 86 120 156Z"/>
+      <path d="M116 150 Q116 90 112 30 Q130 90 122 152Z"/>
+    </g>
+    <path d="M116 150 Q60 100 0 128 Q66 118 116 158Z" fill="var(--b,#3d5630)" opacity=".7"/>
+  </symbol>
+
+  <symbol id="pine" viewBox="0 0 160 360">
+    <rect x="72" y="290" width="16" height="70" fill="var(--c,#5a4636)"/>
+    <path d="M80 0 L130 110 L104 110 L150 210 L118 210 L160 300 L0 300 L42 210 L10 210 L56 110 L30 110Z" fill="var(--a,#3f5a43)"/>
+    <path d="M80 0 L130 110 L104 110 L150 210 L118 210 L160 300 L80 300Z" fill="var(--b,#334a37)"/>
+  </symbol>
+
+  <symbol id="tree-round" viewBox="0 0 220 300">
+    <rect x="100" y="180" width="20" height="120" fill="var(--c,#5e4936)"/>
+    <circle cx="110" cy="110" r="100" fill="var(--a,#6f8350)"/>
+    <path d="M110 10 A100 100 0 0 1 110 210 A70 100 0 0 0 110 10Z" fill="var(--b,#5c6f42)"/>
+  </symbol>
+
+  <symbol id="grass" viewBox="0 0 120 60">
+    <path d="M0 60 Q10 20 14 0 Q20 30 24 60 Q34 24 44 8 Q44 36 46 60 Q60 22 72 4 Q70 36 70 60 Q84 30 98 12 Q94 40 96 60 Q106 30 120 20 Q114 44 116 60Z" fill="var(--a,#6b7d45)"/>
+  </symbol>
+
+  <symbol id="house" viewBox="0 0 220 220">
+    <rect x="20" y="90" width="180" height="130" fill="var(--a,#efe1c4)"/>
+    <rect x="110" y="90" width="90" height="130" fill="var(--b,#dccaa6)"/>
+    <path d="M0 96 L110 20 L220 96Z" fill="var(--c,#b5482f)"/>
+    <path d="M110 20 L220 96 L110 96Z" fill="var(--d,#9a3b26)"/>
+    <rect x="50" y="130" width="34" height="40" fill="var(--e,#5a4636)"/>
+    <path d="M138 220 L138 160 Q156 140 174 160 L174 220Z" fill="var(--e,#5a4636)"/>
+  </symbol>
+
+  <symbol id="house-flat" viewBox="0 0 200 180">
+    <rect x="0" y="40" width="200" height="140" fill="var(--a,#e9d6b2)"/>
+    <rect x="0" y="22" width="200" height="22" fill="var(--c,#b5482f)"/>
+    <rect x="24" y="80" width="30" height="36" fill="var(--e,#5a4636)"/>
+    <rect x="86" y="80" width="30" height="36" fill="var(--e,#5a4636)"/>
+    <path d="M140 180 L140 110 Q158 92 176 110 L176 180Z" fill="var(--e,#5a4636)"/>
+  </symbol>
+
+  <symbol id="rumah-adat" viewBox="0 0 260 260">
+    <path d="M10 70 Q130 140 250 70 L222 150 L38 150Z" fill="var(--c,#3a2f2a)"/>
+    <path d="M0 40 Q130 120 260 40 Q240 90 222 150 Q130 110 38 150 Q20 90 0 40Z" fill="var(--d,#5b4636)"/>
+    <rect x="44" y="150" width="172" height="60" fill="var(--b,#8a3a26)"/>
+    <path d="M44 162 H216 M44 196 H216" stroke="var(--a,#efe1c4)" stroke-width="5"/>
+    <path d="M60 210 V260 M110 210 V260 M150 210 V260 M200 210 V260" stroke="var(--e,#3a2f2a)" stroke-width="12"/>
+  </symbol>
+
+  <symbol id="temple" viewBox="0 0 400 300">
+    <path d="M10 70 L200 0 L390 70Z" fill="var(--c,#b5482f)"/>
+    <rect x="10" y="70" width="380" height="24" fill="var(--a,#f1e6cf)"/>
+    <g fill="var(--a,#f1e6cf)"><rect x="34" y="94" width="34" height="170"/><rect x="104" y="94" width="34" height="170"/><rect x="174" y="94" width="34" height="170"/><rect x="244" y="94" width="34" height="170"/><rect x="314" y="94" width="34" height="170"/></g>
+    <g fill="var(--b,#d8c8a8)"><rect x="56" y="94" width="12" height="170"/><rect x="126" y="94" width="12" height="170"/><rect x="196" y="94" width="12" height="170"/><rect x="266" y="94" width="12" height="170"/><rect x="336" y="94" width="12" height="170"/></g>
+    <rect x="0" y="264" width="400" height="16" fill="var(--b,#d8c8a8)"/><rect x="-10" y="280" width="420" height="20" fill="var(--a,#f1e6cf)"/>
+  </symbol>
+
+  <symbol id="stupa" viewBox="0 0 200 240">
+    <path d="M100 0 L108 60 L92 60Z" fill="var(--b,#6f665c)"/>
+    <rect x="80" y="58" width="40" height="24" fill="var(--a,#8a8175)"/>
+    <path d="M20 200 Q20 80 100 80 Q180 80 180 200Z" fill="var(--a,#8a8175)"/>
+    <path d="M100 80 Q180 80 180 200 L100 200Z" fill="var(--b,#6f665c)"/>
+    <g fill="var(--c,#5b544b)"><path d="M46 140 l8 0 l-4 10z"/><path d="M76 120 l8 0 l-4 10z"/><path d="M116 120 l8 0 l-4 10z"/><path d="M146 140 l8 0 l-4 10z"/></g>
+    <rect x="6" y="200" width="188" height="40" fill="var(--b,#6f665c)"/>
+  </symbol>
+
+  <symbol id="column" viewBox="0 0 80 600">
+    <rect x="0" y="0" width="80" height="26" fill="var(--a,#f1e6cf)"/>
+    <rect x="10" y="26" width="60" height="548" fill="var(--a,#f1e6cf)"/>
+    <rect x="48" y="26" width="22" height="548" fill="var(--b,#d8c8a8)"/>
+    <rect x="10" y="420" width="60" height="154" fill="var(--c,#b5482f)"/>
+    <rect x="0" y="574" width="80" height="26" fill="var(--a,#f1e6cf)"/>
+  </symbol>
+
+  <symbol id="person" viewBox="0 0 60 180">
+    <circle cx="30" cy="18" r="15" fill="var(--a,#2f2722)"/>
+    <path d="M14 40 Q30 32 46 40 L50 110 L40 110 L38 180 L26 180 L24 110 L10 110Z" fill="var(--a,#2f2722)"/>
+  </symbol>
+
+  <symbol id="person-hat" viewBox="0 0 80 190">
+    <path d="M0 26 L40 0 L80 26Z" fill="var(--b,#5a4a3a)"/>
+    <circle cx="40" cy="34" r="12" fill="var(--a,#2f2722)"/>
+    <path d="M24 50 Q40 44 56 50 L62 120 L50 120 L48 190 L36 190 L34 120 L18 120Z" fill="var(--a,#2f2722)"/>
+  </symbol>
+
+  <symbol id="carrier" viewBox="0 0 240 200">
+    <path d="M0 52 L240 40" stroke="var(--b,#5a4a3a)" stroke-width="7"/>
+    <path d="M10 54 L22 104 L50 104 L58 52Z M186 42 L196 92 L224 92 L232 40Z" fill="var(--b,#5a4a3a)"/>
+    <path d="M90 22 L120 4 L150 22Z" fill="var(--b,#5a4a3a)"/>
+    <circle cx="120" cy="30" r="11" fill="var(--a,#2f2722)"/>
+    <path d="M104 44 Q120 38 136 44 L140 110 L132 110 L140 200 L126 200 L120 130 L112 200 L98 200 L106 110 L100 110Z" fill="var(--a,#2f2722)"/>
+  </symbol>
+
+  <symbol id="soldier" viewBox="0 0 60 190">
+    <rect x="18" y="0" width="24" height="20" fill="var(--a,#1f2a44)"/>
+    <circle cx="30" cy="30" r="11" fill="var(--c,#e8cfb0)"/>
+    <path d="M14 44 H46 L48 116 H12Z" fill="var(--a,#1f2a44)"/>
+    <path d="M22 44 L30 70 L38 44" fill="var(--b,#f1ece2)"/>
+    <rect x="16" y="116" width="28" height="74" fill="var(--b,#f1ece2)"/>
+    <rect x="50" y="10" width="4" height="120" fill="var(--d,#3a2f2a)"/>
+  </symbol>
+
+  <symbol id="canoe" viewBox="0 0 260 90">
+    <path d="M0 50 Q130 80 260 50 Q240 86 130 88 Q20 86 0 50Z" fill="var(--a,#4a3a2e)"/>
+    <circle cx="130" cy="22" r="10" fill="var(--b,#2f2722)"/>
+    <path d="M118 34 Q130 28 142 34 L144 62 L116 62Z" fill="var(--b,#2f2722)"/>
+    <path d="M150 20 L190 80" stroke="var(--c,#6a5440)" stroke-width="5"/>
+  </symbol>
+
+  <symbol id="ship" viewBox="0 0 360 340">
+    <path d="M20 250 L340 250 L300 320 L60 320Z" fill="var(--a,#5a3f2c)"/>
+    <rect x="20" y="250" width="320" height="14" fill="var(--d,#8a3a26)"/>
+    <rect x="176" y="20" width="8" height="232" fill="var(--a,#5a3f2c)"/>
+    <rect x="90" y="40" width="8" height="212" fill="var(--a,#5a3f2c)"/>
+    <path d="M184 30 Q270 80 184 160Z M184 160 Q290 200 184 240Z" fill="var(--b,#f1e8d4)"/>
+    <path d="M98 50 Q160 90 98 140Z M98 150 Q170 190 98 236Z" fill="var(--c,#ddd0b6)"/>
+    <path d="M180 20 L230 30 L180 40Z" fill="var(--d,#8a3a26)"/>
+  </symbol>
+
+  <symbol id="waves" viewBox="0 0 600 80">
+    <path d="M0 40 Q37 10 75 40 T150 40 T225 40 T300 40 T375 40 T450 40 T525 40 T600 40 V80 H0Z" fill="var(--a,#4f7f8a)"/>
+    <path d="M0 40 Q37 10 75 40 T150 40 T225 40 T300 40 T375 40 T450 40 T525 40 T600 40" fill="none" stroke="var(--b,#e7efe9)" stroke-width="5" opacity=".8"/>
+  </symbol>
+
+  <symbol id="fish" viewBox="0 0 120 60">
+    <path d="M10 30 Q50 0 90 30 Q50 60 10 30Z" fill="var(--a,#c9a35a)"/>
+    <path d="M86 30 L120 8 L114 30 L120 52Z" fill="var(--a,#c9a35a)"/>
+    <circle cx="30" cy="27" r="4" fill="var(--b,#2f2722)"/>
+  </symbol>
+
+  <symbol id="shark" viewBox="0 0 520 200">
+    <path d="M0 110 Q80 60 230 64 L270 0 L300 66 Q420 74 470 100 L520 40 L500 112 L520 180 L466 124 Q400 150 300 150 L280 186 L250 150 Q120 150 0 110Z" fill="var(--a,#5f7f8c)"/>
+    <path d="M0 110 Q120 150 250 150 L280 186 L300 150 Q400 150 466 124 Q360 132 240 126 Q110 124 0 110Z" fill="var(--b,#dfe7e3)"/>
+    <circle cx="70" cy="100" r="5" fill="var(--c,#1f2a2e)"/>
+    <path d="M110 96 v22 M124 94 v24 M138 94 v24" stroke="var(--c,#1f2a2e)" stroke-width="3" opacity=".5"/>
+  </symbol>
+
+  <symbol id="smoke" viewBox="0 0 200 160">
+    <path d="M30 140 Q0 140 6 110 Q14 80 46 86 Q50 40 96 44 Q130 10 160 46 Q200 54 194 96 Q198 140 160 140Z" fill="var(--a,#8f877d)"/>
+    <path d="M30 140 Q0 140 6 110 Q60 126 120 118 Q170 112 194 96 Q198 140 160 140Z" fill="var(--b,#6f675e)"/>
+  </symbol>
+
+  <symbol id="compass" viewBox="0 0 200 200">
+    <circle cx="100" cy="100" r="92" fill="none" stroke="var(--a,#4a3a2e)" stroke-width="3"/>
+    <circle cx="100" cy="100" r="78" fill="none" stroke="var(--a,#4a3a2e)" stroke-width="1.5"/>
+    <path d="M100 6 L112 100 L100 194 L88 100Z" fill="var(--a,#4a3a2e)"/>
+    <path d="M6 100 L100 88 L194 100 L100 112Z" fill="var(--a,#4a3a2e)"/>
+    <path d="M100 6 L112 100 L100 100Z M194 100 L100 112 L100 100Z M100 194 L88 100 L100 100Z M6 100 L100 88 L100 100Z" fill="var(--b,#b5482f)"/>
+    <path d="M34 34 L104 96 L166 166 L96 104Z M166 34 L104 104 L34 166 L96 96Z" fill="var(--a,#4a3a2e)" opacity=".5"/>
+  </symbol>
+
+  <symbol id="star" viewBox="0 0 20 20">
+    <path d="M10 0 L12 8 L20 10 L12 12 L10 20 L8 12 L0 10 L8 8Z" fill="var(--a,#f5ecd0)"/>
+  </symbol>
+
+  <symbol id="crack" viewBox="0 0 300 300">
+    <path d="M150 0 L140 60 L170 110 L130 170 L160 230 L140 300 M140 60 L90 80 L60 70 M170 110 L230 120 L270 100 M130 170 L80 200" fill="none" stroke="var(--a,#3a2f2a)" stroke-width="4"/>
+  </symbol>
+
+  <symbol id="frame-meander" viewBox="0 0 1080 60">
+    <rect width="1080" height="60" fill="var(--a,#b5482f)"/>
+    <path d="M0 48 H20 V12 H60 V36 H40 V24 M60 48 H80 V12 H120 V36 H100 V24 M120 48 H140 V12 H180 V36 H160 V24 M180 48 H200 V12 H240 V36 H220 V24 M240 48 H260 V12 H300 V36 H280 V24 M300 48 H320 V12 H360 V36 H340 V24 M360 48 H380 V12 H420 V36 H400 V24 M420 48 H440 V12 H480 V36 H460 V24 M480 48 H500 V12 H540 V36 H520 V24 M540 48 H560 V12 H600 V36 H580 V24 M600 48 H620 V12 H660 V36 H640 V24 M660 48 H680 V12 H720 V36 H700 V24 M720 48 H740 V12 H780 V36 H760 V24 M780 48 H800 V12 H840 V36 H820 V24 M840 48 H860 V12 H900 V36 H880 V24 M900 48 H920 V12 H960 V36 H940 V24 M960 48 H980 V12 H1020 V36 H1000 V24 M1020 48 H1040 V12 H1080 V36 H1060 V24" fill="none" stroke="var(--b,#f1e6cf)" stroke-width="5"/>
+  </symbol>
+</defs>
+</svg>

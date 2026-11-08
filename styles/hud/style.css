@@ -1,0 +1,36 @@
+/* HUD: sci-fi simulation screen. Neon cyan + hot orange on near-black, mono labels, corner brackets. */
+#stage { background: #04080c; }
+.title { font-family: "Chakra Petch", sans-serif; font-weight: 700; letter-spacing: .02em; line-height: 1.0; }
+.title.light  { color: #f2fbff; text-shadow: 0 0 18px rgba(95, 227, 255, .45); }
+.title.cyan   { color: #6fe6ff; text-shadow: 0 0 22px rgba(95, 227, 255, .75); }
+.title.orange { color: #ffae4a; text-shadow: 0 0 22px rgba(255, 150, 50, .7); }
+.title.boxed { display: inline-block; left: 50%; right: auto; transform-origin: 50% 50%; padding: 18px 34px 22px;
+  background: rgba(30, 14, 4, .78); border: 3px solid #ffae4a; box-shadow: 0 0 26px rgba(255, 150, 50, .45); }
+.title .unit { font-size: .4em; margin-left: .12em; }
+.title .sub { font-family: "Share Tech Mono", monospace; font-weight: 400; font-size: .24em; letter-spacing: .2em; color: #8fdcf0; text-shadow: none; }
+.title.caps { text-transform: uppercase; }
+.tag { padding: 10px 22px; background: rgba(4, 14, 20, .86); color: #f2fbff; border: 2px solid #5fe3ff;
+  font-family: "Chakra Petch", sans-serif; font-weight: 700; font-size: 36px; letter-spacing: .1em; text-transform: uppercase;
+  box-shadow: 0 0 16px rgba(95, 227, 255, .35); }
+.tag.warn { border-color: #ffae4a; color: #ffd9a8; box-shadow: 0 0 16px rgba(255, 150, 50, .4); }
+
+#caption .box { font-family: "Lexend", sans-serif; font-weight: 600; font-size: 52px; line-height: 1.2; }
+#caption.hud .box { padding: 16px 38px 20px; color: #ffffff; background: rgba(4, 14, 22, .84);
+  border: 2.5px solid rgba(110, 230, 255, .9); border-radius: 16px;
+  box-shadow: 0 0 22px rgba(95, 227, 255, .35), inset 0 0 18px rgba(95, 227, 255, .12); }
+#caption .w.todo { color: rgba(255, 255, 255, .32); }
+#caption .w.key.done, #caption .w.key.now { color: #ffae4a; text-shadow: 0 0 14px rgba(255, 150, 50, .55); }
+
+/* chrome */
+.hud-corner { position: absolute; width: 64px; height: 64px; border: 3px solid rgba(140, 230, 255, .75); }
+.hud-corner.tl { left: 36px; top: 150px; border-right: 0; border-bottom: 0; }
+.hud-corner.tr { right: 36px; top: 150px; border-left: 0; border-bottom: 0; }
+.hud-corner.bl { left: 36px; bottom: 150px; border-right: 0; border-top: 0; }
+.hud-corner.br { right: 36px; bottom: 150px; border-left: 0; border-top: 0; }
+.hud-head { position: absolute; top: 190px; left: 72px; right: 72px; display: flex; justify-content: space-between; }
+.hud-mini { font-family: "Share Tech Mono", monospace; font-size: 24px; letter-spacing: .22em; color: rgba(140, 230, 255, .7); text-transform: uppercase; }
+.hud-status { font-family: "Chakra Petch", sans-serif; font-weight: 700; font-size: 40px; color: #f2fbff; letter-spacing: .04em; margin-top: 6px; }
+.hud-status b { color: #6fe6ff; font-weight: 700; }
+.hud-clock { font-family: "Chakra Petch", sans-serif; font-weight: 600; font-size: 42px; color: #f2fbff; text-align: right; margin-top: 6px; letter-spacing: .06em; }
+.hud-foot { position: absolute; left: 72px; right: 72px; bottom: 112px; font-family: "Share Tech Mono", monospace; font-size: 20px; color: rgba(140, 230, 255, .5); letter-spacing: .12em; }
+.hud-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #6fe6ff; margin-right: 12px; box-shadow: 0 0 10px #6fe6ff; }

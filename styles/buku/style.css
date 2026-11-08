@@ -1,0 +1,18 @@
+/* BUKU: warm storybook. Pencil-outlined flat art on watercolour paper. Titles: rounded bold. Captions: cream pill. */
+#stage { background: #efe4cf; }
+.title { font-family: "Fredoka", sans-serif; font-weight: 600; letter-spacing: .01em; }
+.title.brown { color: #7a3f27; text-shadow: 0 3px 0 rgba(255, 246, 228, .8); }
+.title.red   { color: #c9532c; text-shadow: 0 3px 0 rgba(255, 246, 228, .8); }
+.title.dark  { color: #4b3427; text-shadow: 0 3px 0 rgba(255, 246, 228, .7); }
+.title.light { color: #fff7e8; text-shadow: 0 4px 14px rgba(60, 30, 10, .45); }
+.title .unit { font-size: .42em; margin-left: .1em; }
+.title .sub { font-family: "Nunito", sans-serif; font-weight: 800; font-size: .3em; color: #6b4a36; letter-spacing: .02em; }
+.tag { padding: 10px 28px; background: #fbf4e6; color: #6b4a36; border: 2.5px solid #4b3427; border-radius: 16px;
+  font-family: "Fredoka", sans-serif; font-weight: 500; font-size: 36px; letter-spacing: .02em; box-shadow: 0 4px 0 rgba(75,52,39,.25); }
+.tag.small { font-family: "Nunito"; font-weight: 800; font-size: 30px; letter-spacing: .14em; text-transform: uppercase; background: none; border: 0; box-shadow: none; color: #6b4a36; }
+
+#caption .box { font-family: "Fredoka", sans-serif; font-weight: 600; font-size: 56px; line-height: 1.18; }
+#caption.pill .box { padding: 14px 44px 18px; color: #4b3427; background: rgba(250, 244, 230, .96);
+  border-radius: 48px; border: 2px solid rgba(200, 180, 150, .6); box-shadow: 0 6px 0 rgba(120, 90, 60, .12), 0 10px 26px rgba(80, 50, 20, .18); }
+#caption .w.todo { color: #c6b49b; }
+#caption .w.key.done, #caption .w.key.now { color: #d4552b; }

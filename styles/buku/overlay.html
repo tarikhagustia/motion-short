@@ -1,0 +1,12 @@
+<svg width="1080" height="1920" viewBox="0 0 1080 1920" style="position:absolute;inset:0;mix-blend-mode:multiply;opacity:.42">
+  <filter id="wcpaper" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" seed="4" result="n"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 .9  0 0 0 0 .84  0 0 0 0 .74  0 0 0 -.9 .75"/>
+  </filter>
+  <rect width="1080" height="1920" filter="url(#wcpaper)"/>
+  <filter id="blot"><feTurbulence type="fractalNoise" baseFrequency="0.004 0.006" numOctaves="3" seed="9"/>
+    <feColorMatrix type="matrix" values="0 0 0 0 .85  0 0 0 0 .74  0 0 0 0 .6  0 0 0 -1.6 1.05"/></filter>
+  <rect width="1080" height="1920" filter="url(#blot)" opacity=".35"/>
+</svg>
+<div id="grain" style="position:absolute;inset:-40px;opacity:.07;mix-blend-mode:overlay;background-size:256px 256px"></div>
+<div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 46%, rgba(0,0,0,0) 60%, rgba(90,55,25,.28) 100%)"></div>

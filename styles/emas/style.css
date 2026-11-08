@@ -1,0 +1,29 @@
+/* EMAS: ornamental gold on batik fabric. Titles: gold serif with glow. Captions: crimson banner, gold rules. */
+#stage { background: #3a2216; }
+.title { font-family: "Playfair Display", serif; font-weight: 700; letter-spacing: .01em; }
+.title.gold { filter: drop-shadow(0 0 22px rgba(255, 196, 92, .55)) drop-shadow(0 5px 3px rgba(40, 12, 0, .75)); }
+.title.gold .l { background: linear-gradient(180deg, #fff6cf 0%, #f7d77c 30%, #d39b35 58%, #f8e09a 76%, #b07a22 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+.title.cream { color: #f6ead0; text-shadow: 0 4px 16px rgba(0,0,0,.55); }
+.title.dark { color: #3b1f12; }
+.title .unit { font-size: .36em; margin-left: .12em; vertical-align: .9em; }
+.title .sub { font-family: "Mulish", sans-serif; font-weight: 800; font-size: .26em; letter-spacing: .02em;
+  background: none !important; color: #fbeed2 !important; -webkit-text-fill-color: #fbeed2; }
+.title.caps { text-transform: uppercase; letter-spacing: .06em; }
+.tag { padding: 12px 34px; background: rgba(60, 14, 22, .92); color: #f6dc8c; border-top: 2px solid #d8b25a; border-bottom: 2px solid #d8b25a;
+  font-family: "Playfair Display", serif; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; font-size: 34px; }
+.tag.plain { background: none; border: 0; color: #fbeed2; font-family: "Mulish"; font-weight: 800; letter-spacing: .02em; text-transform: none;
+  text-shadow: 0 3px 10px rgba(0,0,0,.7); font-size: 40px; }
+
+#caption .box { font-family: "Mulish", sans-serif; font-weight: 800; font-size: 54px; line-height: 1.24; }
+#caption.banner .box { min-width: 820px; padding: 24px 64px 28px; color: #fff8ec;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 210, 120, .10) 0 2px, transparent 3px) 0 0 / 26px 26px,
+    linear-gradient(180deg, #8d2533 0%, #74192a 55%, #651424 100%);
+  border-top: 3px solid #d9b45e; border-bottom: 3px solid #d9b45e;
+  box-shadow: 0 0 0 1px rgba(80, 10, 20, .9), 0 12px 28px rgba(0, 0, 0, .55); }
+#caption.banner .box::before, #caption.banner .box::after { content: ""; position: absolute; left: 14px; right: 14px; height: 1.5px;
+  background: rgba(230, 196, 110, .75); }
+#caption.banner .box::before { top: 8px; } #caption.banner .box::after { bottom: 8px; }
+#caption .w.todo { color: rgba(255, 236, 214, .42); }
+#caption .w.key.done, #caption .w.key.now { color: #f8cf5f; }

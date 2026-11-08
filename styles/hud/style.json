@@ -1,0 +1,10 @@
+{
+  "caption_style": "hud",
+  "caption_y": 1440,
+  "title_color": "light",
+  "title_anim": "type",
+  "letter_delay": 0.035,
+  "fade": 0.3,
+  "music": "hud",
+  "chrome": {"sim": "SIM 01", "clock_rate": 1, "clock_label": "WAKTU SIMULASI"}
+}
