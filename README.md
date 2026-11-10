@@ -16,6 +16,7 @@ lalu mengerjakan semuanya sampai `video.mp4` dan `upload.txt` jadi.
 | **misteri** | `emas` versi malam + suara gelap | hal yang belum terjelaskan, legenda |
 | **explainer** | `buku` — kertas cat air, karakter pensil lucu | "kenapa…?", hewan, tubuh, sains sehari-hari |
 | **sejarah** | `emas` — kain batik + garis emas + gamelan | kerajaan, tokoh, budaya |
+| **bedah** | `bedah` — model 3D toon dibelah (Three.js), bagian yang dibahas jadi kuning, header angka + badge | "kok bisa?" benda sehari-hari: magic com, presto, meteran, MCB, motor matic |
 
 ## Cara kerja
 
@@ -79,7 +80,7 @@ Detail lengkap ada di [SKILL.md](SKILL.md), [references/format.md](references/fo
 ├── SKILL.md            instruksi skill untuk Claude
 ├── assets/             template.html (engine animasi), font, simbol
 ├── scripts/            voice, timeline, render, sound, svgkit, hyperframes, klien OmniVoice
-├── styles/             paket tampilan: emas, buku, hud, lukis
+├── styles/             paket tampilan: emas, buku, hud, lukis, bedah
 └── references/         format naskah, gaya video, dokumentasi engine
 ```
 

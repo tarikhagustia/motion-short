@@ -1,0 +1,12 @@
+{
+  "caption_style": "bedah",
+  "caption_y": 1230,
+  "title_color": "dark",
+  "title_anim": "rise",
+  "title_size": 66,
+  "title_y": 170,
+  "letter_delay": 0,
+  "fade": 0.25,
+  "music": "bedah",
+  "chrome": {"badge_kind": "note"}
+}

@@ -1,2 +1,5 @@
 Lora (Cyreal) and Poppins (Indian Type Foundry) are licensed under the SIL Open Font License 1.1.
 https://openfontlicense.org
+
+Inter (The Inter Project Authors) and JetBrains Mono (The JetBrains Mono Project Authors) are licensed
+under the SIL Open Font License 1.1 (from github.com/google/fonts, ofl/inter and ofl/jetbrainsmono).

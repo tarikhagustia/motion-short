@@ -17,9 +17,9 @@ projects/<slug>/
 
 ## storyboard.json
 
-Top level: `topic`, `genre` (`dokumenter` | `sains` | `misteri` | `explainer` | `sejarah`; see `genres.md`),
-`style` (`emas` | `buku` | `hud` | `lukis`), optional overrides of the style defaults
-(`caption_style`, `caption_y`, `title_color`, `title_anim`, `letter_delay`, `fade`, `music`),
+Top level: `topic`, `genre` (`dokumenter` | `sains` | `misteri` | `explainer` | `sejarah` | `bedah`; see `genres.md`),
+`style` (`emas` | `buku` | `hud` | `lukis` | `bedah`), optional overrides of the style defaults
+(`caption_style`, `caption_y`, `title_color`, `title_anim`, `title_size`, `title_y`, `letter_delay`, `fade`, `music`),
 `chrome` (hud header values: `sim`, `title`, `footer`, `clock_rate`, `clock_label`), `auto_whoosh`,
 `paint` (lukis painter: `scene`, `seed`, `zoom`, `ramp`, `puffs`, `flash_words`, `lightning`, `scary`,
 `blast_words`; full list in `styles/lukis/guide.md`). Word lists are `[[sid, word, offset]]`; the same
@@ -37,13 +37,14 @@ Per scene:
 | `effects` | particle overlay: `ash dust rain snow bubbles embers leaves gold motes embers2 petals` |
 | `camera` | `{zoom: [a, b], pan: [x, y], parallax}` |
 | `transition` | `fade` (default) · `cut` · `zoom` |
-| `chrome` | hud: per-scene header values, e.g. `{"status": "GELAP"}` |
+| `chrome` | hud: per-scene header values, e.g. `{"status": "GELAP"}` · bedah: `{"badge": "MENDIDIH", "badge_kind": "warn", "sub": "JAM 21.00"}` |
 | `paint` | lukis: start a new painter segment here, e.g. `{"scene": "globe", "rings_word": ["s06", "Gelombang"]}` (see `styles/lukis/guide.md`) |
 | `sfx` | `[{kind, word | at, offset, dur, volume, ambience}]` — kinds listed in `scripts/sound.py` |
 
-Title colours per style: emas `gold cream dark`; buku `brown red dark light`; hud `light cyan orange`
+Title text: `*words*` between asterisks get the look's accent (bedah: red).
+Title colours per style: bedah `dark` (+ class `bunyi` [`blue`|`red`] for onomatopoeia); emas `gold cream dark`; buku `brown red dark light`; hud `light cyan orange`
 (+ class `boxed`); lukis `cream gold` (+ class `caps`; `gold` turns fire red in scary mode). Tag classes: emas `plain`; buku `small`; hud `warn`.
-Title animations: `shine` (emas), `pop` (buku), `type` (hud), `blur` (lukis).
+Title animations: `shine` (emas), `pop` (buku), `type` (hud), `blur` (lukis), `rise` (bedah).
 
 ## Scene SVG
 
@@ -83,6 +84,12 @@ A `transform` attribute on an animated element is moved to a wrapper automatical
 
 `style.js` may set `STYLE.frame = (t, sceneIndex, tInScene) => …`; the engine calls it every frame after
 the SVG animations (lukis uses it to repaint the canvas and shake the text).
+
+## Look libraries and project models
+
+A look may ship `lib/*.js` (inlined first, in name order; bedah: `00-three.min.js` r149 + `10-stage.js`);
+a project may ship `model.js` (inlined after the libs, before the look's `style.js`). bedah uses this:
+the page draws a WebGL canvas (SwiftShader in headless Chromium, ~0.2-0.4 s per frame) under the titles.
 
 ## HyperFrames (lukis)
 

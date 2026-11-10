@@ -13,8 +13,9 @@ Write both into the storyboard: `"genre": "misteri"` (the gaya) and `"style": "e
 | `misteri` | fenomena belum terjelaskan, legenda, tempat hilang, sinyal aneh | `emas` with `night_cloth` grounds · `lukis` + `scary` for a natural event | gelap, pelan, penuh tanya |
 | `explainer` | "kenapa…?", hewan, tubuh, makanan, sains sehari-hari | `buku` | hangat, ramah, jelas langkah demi langkah |
 | `sejarah` | kerajaan, tokoh, pelayaran, budaya, arkeologi | `emas` | megah, kronologis, tanggal & nama |
+| `bedah` | "kok bisa?" satu benda sehari-hari: magic com, presto, meteran, MCB, motor matic, termos | `bedah` (3D cutaway) | santai, cepat, spesifik, satu pertanyaan sampai tuntas |
 
-All five keep the skeleton in `format.md` (hook → anchor → mechanism → twist → closer, 85-105 words,
+All six keep the skeleton in `format.md` (hook → anchor → mechanism → twist → closer, 85-105 words,
 35-47 s). Below is what changes per gaya.
 
 ---
@@ -84,6 +85,39 @@ All five keep the skeleton in `format.md` (hook → anchor → mechanism → twi
 - **Closer**: the trace that is still here ("namanya masih kita pakai sampai sekarang").
 - **Honesty**: dates disputed between sources → "sekitar" or "abad ke-7".
 
+## bedah
+
+"Kok bisa?" about one cheap object found in almost every home, cut open in 3D. Six traits that make
+it work: (1) the opening is a moment the viewer has lived, (2) one question, answered completely,
+(3) one narrator, one take, (4) dense and specific, every term explained on the spot, (5) the picture
+follows the words, (6) the object is everyday and cheap (kitchen, meteran, motor, saklar, kipas).
+
+- **Hook (≈ 6 s)**: the sound or moment everyone knows, then the paradox, then the catchphrase.
+  "Air mendidih jam 9 malam, masuk termos. Besok pagi masih bisa buat nyeduh kopi. Nggak pakai
+  listrik, nggak pakai baterai. Kok bisa? Kita cek rahasianya." The phrase **"Kok bisa? Kita cek
+  rahasianya."** is the turn; the cutaway opens on "rahasianya".
+- **Shape**: hook → paradox → "Kok bisa? Kita cek rahasianya." → the parts, one per beat (name it, say
+  what it does) → the key physics with one exact, sourced number → the fault / safety case or a home
+  test ("Coba deh, …") → punchline → CTA.
+- **Narration**: casual Jakarta Indonesian ("nggak", "muter", "nempel", "kayak", "ngurangin"), short
+  chained clauses, 2.5-3 words/s, no filler. Calculations said out loud ("2.000 watt dibagi 220 volt,
+  sekitar 9 ampere"). `--speed 1.05-1.1`.
+- **Rhythm**: 8-10 beats of 3.5-5 s, each with its own numbered title ("1 · Dinding ganda, *hampa
+  udara*", "3 · Di ruang hampa, jalannya *putus*"), a camera move to the part, the part turning yellow
+  on its word, a callout pill. Readout and badge change with the state. One slow-motion beat at the
+  key moment.
+- **Sound**: the object's own foley loud on the word (`klik`, `hiss`, `rev`, `relay`, `beep3`, `boil`),
+  soft `bedah` lo-fi bed under everything (or a user-supplied bed via `render.py --music`).
+- **Closer**: a reframe in two short sentences, "bukan X, tapi Y": "Jadi termos bukan bikin panas. Dia
+  cuma nutup semua jalan keluarnya."
+- **CTA (wajib, last scene, ≈ 2.5 s)**: always end with its own scene asking for the next topic:
+  "Mau dicek rahasia apa lagi? Tulis di kolom komentar." (narration + caption, `keywords`
+  ["rahasia", "komentar."]). Title `Mau dicek rahasia *apa lagi?*`, the model back to the wide shot,
+  closed again or slowly turning, badge `note` with `KOMENTAR`, a `pop` SFX on "komentar". Keep the
+  wording, it is the series' sign-off. The upload text's question line uses the same ask.
+- **Honesty**: numbers on the readout that no source gives are illustration only; never say them.
+  Safety advice (pressure cookers, electricity) must be conservative and sourced.
+
 ---
 
 ## Asking the user
@@ -91,7 +125,7 @@ All five keep the skeleton in `format.md` (hook → anchor → mechanism → twi
 Ask before research, unless the user already named a gaya, a reference video, or said to just go
 (then pick the best fit and say which). Use `AskUserQuestion` (one question, max 4 options):
 
-- Rank the five by fit for the topic; offer the best 4, best first with "(Recommended)". The 5th stays
+- Rank the six by fit for the topic; offer the best 4, best first with "(Recommended)". The rest stay
   reachable through the automatic "Other" field; name it in the question text.
 - Each option: label = the gaya name ("Dokumenter"), description = one line of what *this* topic would
   look and sound like in that gaya ("Lukisan minyak hidup, narasi tenang, kronologis dari pagi hingga

@@ -78,11 +78,13 @@ DATA.scenes.forEach((sc, i) => {
     } else {
       const cls = ['title', tx.kind === 'stat' ? 'stat' : '', tx.caps ? 'caps' : '', tx.color || DATA.title_color || 'dark', tx.class || ''];
       el.className = cls.join(' ');
-      el.style.top = (tx.y ?? 230) + 'px';
-      el.style.fontSize = (tx.size ?? (tx.kind === 'stat' ? 170 : 130)) + 'px';
+      el.style.top = (tx.y ?? DATA.title_y ?? 230) + 'px';
+      el.style.fontSize = (tx.size ?? (tx.kind === 'stat' ? 170 : (DATA.title_size ?? 130))) + 'px';
+      let em = false;  // *words* between asterisks get class "em" (accent colour, per look)
       (tx.text || '').split('\n').forEach((line, li) => {
         if (li) el.appendChild(document.createElement('br'));
-        [...line].forEach(ch => { const s = document.createElement('span'); s.className = 'l'; s.textContent = ch; el.appendChild(s); });
+        [...line].forEach(ch => { if (ch === '*') { em = !em; return; }
+          const s = document.createElement('span'); s.className = em ? 'l em' : 'l'; s.textContent = ch; el.appendChild(s); });
       });
       if (tx.unit) { const u = document.createElement('span'); u.className = 'l unit'; u.textContent = tx.unit; el.appendChild(u); }
       if (tx.sub) { el.appendChild(document.createElement('br')); const u = document.createElement('span'); u.className = 'l sub'; u.textContent = tx.sub; el.appendChild(u); }

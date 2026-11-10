@@ -35,6 +35,7 @@ FONTS = {
     "Chakra Petch": ("ChakraPetch-Bold.ttf", "700"), "Lexend": ("Lexend.ttf", "100 900"),
     "Share Tech Mono": ("ShareTechMono.ttf", "400"),
     "Cormorant Garamond": ("CormorantGaramond.ttf", "300 700"),
+    "Inter": ("Inter.ttf", "100 900"), "JetBrains Mono": ("JetBrainsMono.ttf", "100 800"),
 }
 
 
@@ -56,7 +57,9 @@ def load_style(name):
         raise SystemExit(f"unknown style '{name}'. Available: {', '.join(p.name for p in STYLE_DIR.iterdir() if p.is_dir())}")
     rd = lambda f: (d / f).read_text(encoding="utf-8") if (d / f).exists() else ""
     cfg = json.loads(rd("style.json") or "{}")
-    return cfg, rd("style.css"), rd("overlay.html"), rd("chrome.html"), rd("paint.js") + chr(10) + rd("style.js")
+    # a look may ship libraries in lib/*.js (loaded first, in name order), e.g. bedah: three.js + stage
+    lib = chr(10).join(f.read_text(encoding="utf-8") for f in sorted((d / "lib").glob("*.js"))) if (d / "lib").is_dir() else ""
+    return cfg, rd("style.css"), rd("overlay.html"), rd("chrome.html"), lib, rd("paint.js") + chr(10) + rd("style.js")
 
 
 def load_svg(path, idx):
@@ -93,7 +96,10 @@ def build_html(proj, sb, tl):
             f'<div class="scene" id="scene-{i}"><div class="cam">{art}'
             f'<svg class="fx" viewBox="0 0 1080 1920"></svg></div></div>')
     symbols = SYMBOLS.read_text(encoding="utf-8") if SYMBOLS.exists() else ""
-    cfg, css, overlay, chrome, sjs = load_style(sb.get("style", "buku"))
+    cfg, css, overlay, chrome, lib, sjs = load_style(sb.get("style", "buku"))
+    # a project may ship model.js (bedah: the 3D object and its motion), loaded between lib and style.js
+    model = (proj / "model.js").read_text(encoding="utf-8") if (proj / "model.js").exists() else ""
+    sjs = lib + chr(10) + model + chr(10) + sjs
     pick = lambda k, d: sb.get(k, cfg.get(k, d))
     data = {
         "scenes": [{k: sc.get(k) for k in ("id", "texts", "effects", "camera", "transition", "chrome")} for sc in sb["scenes"]],
@@ -103,6 +109,8 @@ def build_html(proj, sb, tl):
         "title_color": pick("title_color", "dark"),
         "title_anim": pick("title_anim", "blur"),
         "letter_delay": pick("letter_delay", 0.045),
+        "title_size": pick("title_size", None),
+        "title_y": pick("title_y", None),
         "chrome": {**cfg.get("chrome", {}), **sb.get("chrome", {})},
         "paint": paint_config(sb, tl) if sb.get("style") == "lukis" else sb.get("paint", {}),
         "timeline": tl,
@@ -110,9 +118,10 @@ def build_html(proj, sb, tl):
     html = TEMPLATE.read_text(encoding="utf-8")
     html = html.replace("{{FONT_FACES}}", font_faces())
     html = html.replace("{{STYLE_CSS}}", css).replace("{{OVERLAY}}", overlay).replace("{{CHROME}}", chrome)
-    html = html.replace("{{STYLE_JS}}", sjs)
+    # STYLE_JS last, so library code is never scanned for the other placeholders
     html = html.replace("{{SCENES}}", symbols + "\n" + "\n".join(scenes_html))
     html = html.replace("{{DATA}}", json.dumps(data, ensure_ascii=False))
+    html = html.replace("{{STYLE_JS}}", sjs)
     out = proj / ".render.html"
     out.write_text(html, encoding="utf-8")
     return out
@@ -121,7 +130,9 @@ def build_html(proj, sb, tl):
 def open_page(html_path):
     from playwright.sync_api import sync_playwright
     pw = sync_playwright().start()
-    browser = pw.chromium.launch(args=["--allow-file-access-from-files", "--disable-web-security"])
+    # WebGL (bedah) runs on SwiftShader in headless Chromium
+    browser = pw.chromium.launch(args=["--allow-file-access-from-files", "--disable-web-security",
+                                       "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"])
     page = browser.new_page(viewport={"width": 1080, "height": 1920}, device_scale_factor=1)
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))

@@ -1,14 +1,14 @@
 ---
 name: motion-shorts
-description: Make a ready-to-upload Indonesian fact Short (YouTube Shorts / Reels / TikTok, 9:16 MP4, 35-47 s) in the "Motionformat-like" house format - researched script with sources, cloned-voice narration (OmniVoice), word-by-word karaoke captions, richly animated scenes, synthesized SFX + music bed, and the upload text. First asks the user which gaya video they want - dokumenter (cinematic painted disasters/nature, optional terrifying mode), sains ("what if" physics/space simulation screen), misteri (dark, unexplained, open question), explainer (warm storybook "kenapa?"), sejarah (ornamental gold & batik) - and adapts script, tone, rhythm, look and sound to it. Use it whenever the user asks for a short / reel / TikTok / "video fakta", "video edukasi 40 detik", "shorts kayak Motionformat", "video dokumenter/misteri/sejarah singkat", even if they only give a topic.
+description: Make a ready-to-upload Indonesian fact Short (YouTube Shorts / Reels / TikTok, 9:16 MP4, 35-47 s) in the "Motionformat-like" house format - researched script with sources, cloned-voice narration (OmniVoice), word-by-word karaoke captions, richly animated scenes, synthesized SFX + music bed, and the upload text. First asks the user which gaya video they want - dokumenter (cinematic painted disasters/nature, optional terrifying mode), sains ("what if" physics/space simulation screen), misteri (dark, unexplained, open question), explainer (warm storybook "kenapa?"), sejarah (ornamental gold & batik), bedah ("kok bisa?" flat toon 3D cutaway of an everyday object) - and adapts script, tone, rhythm, look and sound to it. Use it whenever the user asks for a short / reel / TikTok / "video fakta", "video edukasi 40 detik", "shorts kayak Motionformat", "video dokumenter/misteri/sejarah singkat", "video bedah / kok bisa / cara kerja benda" (magic com, presto, meteran, MCB, motor matic), even if they only give a topic.
 ---
 
 # Motion Shorts
 
 Topic in, finished MP4 + `upload.txt` out. Two layers:
-- **Gaya video** (`references/genres.md`): dokumenter · sains · misteri · explainer · sejarah. What the
+- **Gaya video** (`references/genres.md`): dokumenter · sains · misteri · explainer · sejarah · bedah. What the
   user chooses. Decides script shape, narration tone, rhythm, sound, and which look to use.
-- **Tampilan** (look pack, `styles/<name>/`): emas · buku · hud · lukis. How it is drawn, so videos
+- **Tampilan** (look pack, `styles/<name>/`): emas · buku · hud · lukis · bedah. How it is drawn, so videos
   with the same look always match. Internal; don't make the user pick these names.
 
 Everything renders locally and deterministically: scene SVGs + a time-driven HTML template, captured frame by frame with
@@ -30,9 +30,10 @@ motion-shorts/
 │   └── omnivoice_tts.py     OmniVoice client (used by voice.py)
 ├── styles/
 │   ├── emas/  buku/  hud/   style.json, style.css, overlay.html, [chrome.html, style.js], kit.py, guide.md
-│   └── lukis/               style.json, style.css, overlay.html, style.js, paint.js (canvas painter), guide.md
+│   ├── lukis/               style.json, style.css, overlay.html, style.js, paint.js (canvas painter), guide.md
+│   └── bedah/               style.json, style.css, overlay.html, chrome.html, style.js, lib/ (three.js + 3D stage), guide.md
 └── references/
-    ├── genres.md            the five gaya: script/tone/rhythm/sound per gaya, gaya -> look, how to ask
+    ├── genres.md            the six gaya: script/tone/rhythm/sound per gaya, gaya -> look, how to ask
     ├── format.md            script formula, scene rhythm, captions, upload text
     └── engine.md            storyboard fields, data-anim list, effects, chrome, debugging
 ```
@@ -54,11 +55,14 @@ a gaya or a reference video, or said "langsung aja" — then pick and say which.
 | misteri | `emas` night grounds + dark sound (`lukis`+scary for natural events) | unexplained, legends, open questions |
 | explainer | `buku` | "kenapa…?", animals, body, everyday science |
 | sejarah | `emas` | kingdoms, figures, voyages, culture |
+| bedah | `bedah` | "kok bisa?" one everyday object cut open: magic com, presto, meteran, MCB, motor matic |
 
 Looks: `emas` batik cloth + gold outlines + gamelan · `buku` watercolour paper + cute pencil characters +
 music box · `hud` near-black screen, neon cyan/orange, panels, meters, synth · `lukis` one living oil
 painting (smoke, fire, lightning), serif titles from blur, dark pad; `paint.scary` = blasts, shake,
-ash, red heartbeat, dread audio.
+ash, red heartbeat, dread audio. · `bedah` near-white ground, one flat-toon 3D model (Three.js) cut open
+with a wedge, the named part turning yellow, black callout pills, mono readout + sparkline + state badge
+header, dark caption pill with the word on yellow, comic onomatopoeia, lo-fi bed + loud mechanical foley.
 
 ## Workflow
 
@@ -88,6 +92,9 @@ ash, red heartbeat, dread audio.
    back into the storyboard. Time every story action to its word with `T.at(sid, "word")`.
    Spend the effort here: full frame, big subject, 4+ ambient motions, one story action per
    scene on its word, a camera move. Draw the topic-specific subject by hand at kit quality.
+   **bedah** needs no scene art either: write `projects/<slug>/model.js` (the 3D object, cut, shots,
+   callouts, glows, readout; contract in `styles/bedah/guide.md`, template `projects/termos-bedah/`),
+   and `gen_scenes.py` writes empty SVGs + one beat title per scene + `bunyi` words.
    **lukis** needs no scene art: `gen_scenes.py` only writes empty SVGs + `texts`; the painting comes
    from `storyboard.paint` and per-scene `paint` segments (volcano, twilight town/fjord/beach, globe). Put
    flashes/blasts/waves on the shock words.
@@ -120,6 +127,9 @@ ash, red heartbeat, dread audio.
 - Scary mode is for events that really were deadly (eruptions, tsunamis); keep the narration factual
   and calm, let picture and sound carry the dread. Never use it for jokes or living victims.
 - Misteri: label every theory as a theory; never present myths or conspiracies as fact.
+- Bedah: the turn is always "Kok bisa? Kita cek rahasianya." and the last scene is always the CTA
+  "Mau dicek rahasia apa lagi? Tulis di kolom komentar." (`genres.md` §bedah). The upload text asks the
+  same question.
 - New look ideas go into the look pack (css/overlay/kit), not into one video, so later videos
   inherit them. A new look = a new folder under `styles/` with the same files. A new gaya = a new
   section in `genres.md` (and a row in the table above), mapped to an existing or new look.

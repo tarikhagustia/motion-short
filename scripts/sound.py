@@ -36,7 +36,7 @@ import numpy as np
 from scipy.signal import butter, sosfilt
 
 SR = 48000
-STYLE_MUSIC = {"emas": "emas", "buku": "buku", "hud": "hud", "lukis": "lukis"}
+STYLE_MUSIC = {"emas": "emas", "buku": "buku", "hud": "hud", "lukis": "lukis", "bedah": "bedah"}
 
 
 # ---------------------------------------------------------------- dsp helpers
@@ -364,11 +364,85 @@ def s_drop(d, r):
     return sine(lambda t: 900 * np.exp(-t * 6) + 80, d) * env_ad(int(d * SR), 0.01, 4) * 0.5
 
 
+# --- mechanical foley (bedah): the object's own sounds, loud and close
+def s_klik(d, r):
+    """Latch / switch snapping: sharp plastic transient + short body thunk (magic com, saklar, MCB)."""
+    d = d or 0.35
+    n = int(d * SR)
+    snap = hp(noise(0.012, r), 1800) * env_ad(int(0.012 * SR), 0.05, 6)
+    body = (sine(lambda t: 420 * np.exp(-t * 30) + 140, d) * 0.8 + bp(noise(d, r), 300, 1600) * 0.4) * env_ad(n, 0.005, 16)
+    out = body.copy()
+    out[: len(snap)] += snap * 1.4
+    b = int(0.045 * SR)  # second, smaller click of the mechanism settling
+    out[b:b + len(snap)] += snap[: n - b] * 0.5
+    return norm(out, 0.9)
+
+
+def s_hiss(d, r):
+    """Steam / air escaping (presto valve, tyre, spray): bright noise with a fast attack and flutter."""
+    d = d or 1.2
+    t = t_axis(d)
+    x = bp(noise(d, r), 2500, 11000) * (1 + 0.25 * np.sin(2 * np.pi * 23 * t) * np.sin(2 * np.pi * 3 * t))
+    e = np.minimum(t / 0.04, 1) * np.exp(-np.maximum(t - d * 0.55, 0) * 6)
+    return norm(x * e, 0.75)
+
+
+def s_rev(d, r):
+    """Small engine revving up (motor, blender, drill): rising harmonic buzz."""
+    d = d or 1.6
+    t = t_axis(d)
+    f = lambda tt: 38 + 95 * (1 - np.exp(-tt * 2.2))
+    saw = np.zeros(len(t))
+    ph = 2 * np.pi * np.cumsum(f(t)) / SR
+    for k in range(1, 9):
+        saw += np.sin(ph * k) / k
+    x = lp(saw, 1800) + bp(noise(d, r), 200, 1200) * 0.15
+    e = np.minimum(t / 0.08, 1) * np.minimum((d - t) / 0.25, 1)
+    return norm(x * e, 0.7)
+
+
+def s_relay(d, r):
+    """Relay / solenoid clack: metallic double knock."""
+    d = d or 0.25
+    out = np.zeros(int(d * SR))
+    for k, (at, v) in enumerate(((0, 1.0), (0.018, 0.55))):
+        g = bp(noise(0.05, r), 900 + 900 * k, 5000) * env_ad(int(0.05 * SR), 0.02, 9) * v
+        g += sine(1850 + 400 * k, 0.05) * env_ad(int(0.05 * SR), 0.01, 12) * 0.3 * v
+        a = int(at * SR)
+        out[a:a + len(g)] += g[: len(out) - a]
+    return norm(out, 0.8)
+
+
+def s_beep3(d, r):
+    """Device warning beeps: three short square-ish beeps (token meter, microwave)."""
+    d = d or 0.75
+    out = np.zeros(int(d * SR))
+    for k in range(3):
+        b = np.sign(sine(2900, 0.11)) * 0.35 * env_ad(int(0.11 * SR), 0.03, 2)
+        a = int(k * 0.2 * SR)
+        out[a:a + len(b)] += lp(b, 7000)[: len(out) - a]
+    return out
+
+
+def s_boil(d, r):
+    """Water boiling / simmering: many small bubble pops over a low rumble."""
+    d = d or 2.0
+    out = lp(noise(d, r), 300) * 0.25
+    for _ in range(int(d * 40)):
+        f0 = r.uniform(300, 900)
+        b = sine(lambda tt: f0 * (1 + tt * 6), 0.04) * env_ad(int(0.04 * SR), 0.05, 6) * r.uniform(0.1, 0.35)
+        a = int(r.uniform(0, d - 0.05) * SR)
+        out[a:a + len(b)] += b
+    return norm(out, 0.6)
+
+
 ONESHOT = {
     "whoosh": s_whoosh, "swoosh": lambda d, r: s_whoosh(d or 0.45, r, hi=True), "pop": s_pop, "click": s_click,
     "tick": s_tick, "ticks": s_ticks, "chime": s_chime, "shimmer": s_shimmer, "sparkle": s_shimmer,
     "impact": s_impact, "thud": s_impact, "crash": s_impact, "boom": s_boom, "explosion": s_boom,
     "rumble": s_rumble, "scribble": s_scribble, "paper": s_paper, "page": s_page, "bubbles": s_bubbles,
+    "klik": s_klik, "latch": s_klik, "hiss": s_hiss, "steam": s_hiss, "rev": s_rev, "relay": s_relay,
+    "beep3": s_beep3, "boil": s_boil,
     "beep": s_beep, "blip": s_blip, "data": s_data, "glitch": s_glitch, "scan": s_scan, "alarm": s_alarm,
     "heartbeat": s_heartbeat, "thunder": s_thunder, "scream": lambda d, r: s_scream(d or 1.2, r), "screams": s_screams, "gong": s_gong, "pluck": s_pluck, "splash": s_splash, "rise": s_rise, "drop": s_drop,
 }
@@ -574,7 +648,44 @@ def m_lukis(dur, r):
     return out[: int(dur * SR)]
 
 
-MUSIC = {"emas": m_emas, "buku": m_buku, "hud": m_hud, "lukis": m_lukis}
+def m_bedah(dur, r):
+    """Light 'workshop' lo-fi: soft electric-piano 7th chords, round bass, brushed kick/rim, 92 bpm.
+    Sits low and steady under a fast narrator; the object's own foley carries the accents."""
+    out = np.zeros(int(dur * SR) + SR)
+    beat = 60 / 92
+    chords = [(57, 60, 64, 67), (53, 57, 60, 64), (55, 59, 62, 65), (52, 55, 59, 62)]  # Am7 Fmaj7 G7 Em7
+    def ep(f, d):  # electric piano: sine + soft bell partial, slow decay, tremolo
+        tt = t_axis(d)
+        x = sine(f, d) + 0.22 * sine(f * 2, d) + 0.08 * sine(f * 7.1, d) * env_ad(int(d * SR), 0.002, 18)
+        return x * env_ad(int(d * SR), 0.01, 3.2) * (1 + 0.12 * np.sin(2 * np.pi * 4.2 * tt))
+    t, i = 0.0, 0
+    while t < dur:
+        a = int(t * SR)
+        bar, b4 = i // 4, i % 4
+        ch = chords[bar % 4]
+        if b4 == 0:
+            for n in ch:
+                x = ep(midi(n), beat * 4) * 0.055
+                out[a:a + len(x)] += x[: len(out) - a]
+        if b4 in (0, 2):  # bass
+            n = ch[0] - 12 - (0 if b4 == 0 else -7)
+            x = sine(midi(n), beat * 1.6) * env_ad(int(beat * 1.6 * SR), 0.02, 4) * 0.16
+            out[a:a + len(x)] += x[: len(out) - a]
+            k = sine(lambda tt: 110 * np.exp(-tt * 30) + 48, 0.25) * env_ad(int(0.25 * SR), 0.01, 7) * 0.22
+            out[a:a + len(k)] += k[: len(out) - a]
+        else:  # rim / brush
+            h = bp(noise(0.06, r), 1800, 6000) * env_ad(int(0.06 * SR), 0.01, 9) * 0.05
+            out[a:a + len(h)] += h[: len(out) - a]
+        # off-beat shaker
+        o = int((t + beat / 2) * SR)
+        sh = hp(noise(0.03, r), 6000) * env_ad(int(0.03 * SR), 0.2, 5) * 0.025
+        out[o:o + len(sh)] += sh[: max(len(out) - o, 0)]
+        t += beat
+        i += 1
+    return lp(out[: int(dur * SR)], 9000)
+
+
+MUSIC = {"emas": m_emas, "buku": m_buku, "hud": m_hud, "lukis": m_lukis, "bedah": m_bedah}
 
 
 # ---------------------------------------------------------------- mixing

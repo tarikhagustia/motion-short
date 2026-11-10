@@ -1,0 +1,63 @@
+/* BEDAH: flat toon 3D cutaway on a near-white ground. Black bold sans titles with red emphasis,
+   a mono readout header, dark caption pill with the spoken word on yellow, black callout pills. */
+#stage { background: #f7f7f5; }
+#gl { position: absolute; inset: 0; width: 1080px; height: 1920px; }
+#bd-fade { position: absolute; left: 0; right: 0; top: 0; height: 560px;
+  background: linear-gradient(#f7f7f5 66%, rgba(247,247,245,0)); }
+
+/* titles: top-left, 2 lines max, *word* = red */
+.title { left: 60px; right: 60px; text-align: left; font-family: "Inter", sans-serif; font-weight: 800;
+  letter-spacing: -.02em; line-height: 1.12; }
+.title.dark { color: #17181b; }
+.title .l.em { color: #e0393e; }
+/* onomatopoeia: comic yellow word with a dark outline, tilted ("KLIK!", "PSSST!") */
+.title.bunyi { left: auto; right: auto; width: auto; font-weight: 900; color: #f3c843; letter-spacing: -.01em;
+  -webkit-text-stroke: 7px #23252b; paint-order: stroke fill; rotate: -8deg; text-transform: uppercase;
+  text-shadow: 0 8px 0 rgba(35,37,43,.18); }
+.title.bunyi.blue { color: #4d7cf0; -webkit-text-stroke-color: #fff; text-shadow: 0 6px 18px rgba(0,0,0,.18); }
+.title.bunyi.red { color: #e0393e; -webkit-text-stroke-color: #fff; }
+.tag { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 26px; letter-spacing: .08em;
+  padding: 10px 20px; border-radius: 999px; background: #23252b; color: #fff; }
+
+/* header readout */
+#bd-head { position: absolute; left: 60px; right: 60px; top: 330px; height: 110px; display: flex; align-items: center; gap: 26px; }
+#bd-read { font-family: "JetBrains Mono", monospace; font-weight: 800; font-size: 86px; letter-spacing: -.03em;
+  color: #17181b; white-space: nowrap; min-width: 330px; }
+#bd-head.hot #bd-read { color: #e0393e; }
+#bd-unit { font-size: 30px; color: #7a7c82; margin-left: 8px; letter-spacing: 0; font-weight: 600; }
+#bd-spark { flex: none; overflow: visible; }
+#bd-spark .tr { fill: none; stroke: #17181b; stroke-width: 3.5; stroke-linejoin: round; }
+#bd-spark .dot { fill: #e0393e; }
+#bd-spark .thr { stroke: #e0393e; stroke-width: 2; stroke-dasharray: 4 5; opacity: .7; }
+#bd-spark .thr-t { font: 600 18px "JetBrains Mono", monospace; fill: #7a7c82; }
+.bd-side { margin-left: auto; text-align: right; }
+.bd-badge span { display: inline-block; padding: 9px 20px; border-radius: 999px; color: #fff; background: #6b6e76;
+  font: 800 24px "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+.bd-badge.go span { background: #1f9d55; }
+.bd-badge.warn span { background: #e0393e; }
+.bd-badge.slow span { background: #e8a317; }
+#bd-sub { margin-top: 8px; font: 700 26px "JetBrains Mono", monospace; color: #17181b; white-space: pre; }
+
+/* callouts pinned to 3D anchors */
+#bd-labels { position: absolute; inset: 0; }
+.bd-lbl { position: absolute; white-space: nowrap; opacity: 0; }
+.bd-lbl.left { transform-origin: right center; }
+.bd-lbl.right { transform-origin: left center; }
+.bd-lbl span { display: inline-block; padding: 11px 22px; border-radius: 999px; background: #23252b; color: #fff;
+  font: 800 27px "Inter", sans-serif; letter-spacing: .06em; text-transform: uppercase; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+.bd-lbl.light span { background: #fff; color: #17181b; }
+/* info card ("DI DALAM ..." panels) */
+.bd-card { position: absolute; opacity: 0; background: #fff; border-radius: 26px; padding: 26px 30px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.18); font: 600 34px "Inter", sans-serif; color: #17181b; }
+.bd-card .k { font: 700 22px "JetBrains Mono", monospace; letter-spacing: .1em; color: #8a8c92; text-transform: uppercase; }
+.bd-card .mono { font-family: "JetBrains Mono", monospace; font-weight: 800; background: #23252b; color: #fff; border-radius: 12px; padding: 8px 16px; display: inline-block; }
+.bd-card .hl { background: #ffd60a; border-radius: 6px; padding: 0 6px; }
+.bd-card .bad { color: #e0393e; }
+
+/* captions: dark pill, spoken word on yellow, coming words dimmed */
+#caption.bedah .box { font-family: "Inter", sans-serif; font-weight: 800; font-size: 50px; line-height: 1.28;
+  padding: 12px 18px; border-radius: 22px; background: rgba(35,37,43,.92); color: #fff; max-width: 920px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.15); }
+#caption.bedah .w { margin: 0; padding: 0 9px; border-radius: 10px; }
+#caption.bedah .w.todo { color: rgba(255,255,255,.55); }
+#caption.bedah .w.now { background: #ffd60a; color: #17181b; }
