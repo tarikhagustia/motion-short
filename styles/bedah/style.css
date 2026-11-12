@@ -61,3 +61,13 @@
 #caption.bedah .w { margin: 0; padding: 0 9px; border-radius: 10px; }
 #caption.bedah .w.todo { color: rgba(255,255,255,.55); }
 #caption.bedah .w.now { background: #ffd60a; color: #17181b; }
+
+/* empty badge = no pill */
+.bd-badge span:empty { display: none; }
+/* big technical term in the top third ("ini namanya…" payoff) */
+.title.term { font-weight: 900; letter-spacing: -.03em; text-transform: none; }
+/* caption keywords in yellow (the spoken word still gets the yellow highlight) */
+#caption.bedah .w.key.done, #caption.bedah .w.key.todo { color: #ffd60a; }
+/* clay look: warm cream ground behind the header */
+.clay #bd-fade { background: linear-gradient(#f3ece0 66%, rgba(243,236,224,0)); }
+.clay #stage, #stage.clay { background: #f3ece0; }

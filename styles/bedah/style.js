@@ -28,6 +28,7 @@
 
   S.stage = B.createStage(Object.assign({}, (window.BEDAH_OPTS || {})));
   const { stage } = S;
+  if (stage.clay) document.getElementById('stage').classList.add('clay');
 
   // --- pinned callouts: S.label("MAGNET", obj, [x,y,z], {from, to, side: "left"|"right"})
   const labelHost = document.getElementById('bd-labels');
@@ -49,6 +50,26 @@
     obj.traverse(m => { if (m.isMesh && !m.userData.hull) { m.material = stage.cloneMat(m.material); mats.push([m.material, m.material.color.clone()]); } });
     glows.push({ mats, target, k: Array.isArray(a) ? (t => B.kf(t, a)) : (t => S.on(t, a, b ?? 1e9)) });
   };
+  // --- solution pop: the object bounces in (scale 0 -> 1.12 -> 1) at `at`. Hidden before.
+  const pops = [];
+  S.popIn = function (obj, at, dur = 0.5) { pops.push({ obj, at, dur, base: obj.scale.clone() }); };
+  // --- glint: a short emissive flash (blue = solution). S.flash(obj, at, color, dur)
+  const flashes = [];
+  S.flash = function (obj, at, color = 0x4da3ff, dur = 0.7) {
+    const mats = [];
+    obj.traverse(m => { if (m.isMesh && !m.userData.hull && m.material.emissive) { m.material = stage.cloneMat(m.material); mats.push(m.material); } });
+    flashes.push({ mats, at, dur, color: new THREE.Color(color) });
+  };
+  // --- danger: everything named turns red between a and b (alias of glow with red)
+  S.danger = (obj, a, b) => S.glow(obj, a, b, 0xe0393e);
+  // --- camera shake: amplitude from keys [[t, amp], ...] -> [dx, dy] (seeded noise, pure in t)
+  S.shake = function (t, keys) {
+    const a = Array.isArray(keys) ? B.kf(t, keys) : keys;
+    if (a <= 0) return null;
+    const n = x => { const i = Math.floor(x), f = x - i; const h = k => B.hash(k); return h(i) + (h(i + 1) - h(i)) * f * f * (3 - 2 * f); };
+    return [(n(t * 28) - 0.5) * 2 * a, (n(t * 31 + 50) - 0.5) * 2 * a];
+  };
+
   // --- info card (HTML) floating over the picture: S.card(html, {from, to, x, y, w})
   const cards = [];
   S.card = function (html, o = {}) {
@@ -71,7 +92,8 @@
   const fmt = (v, dec) => { const [i, f] = Math.abs(v).toFixed(dec).split('.');
     return (v < 0 ? '−' : '') + i.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (f ? ',' + f : ''); };
   const sp = film.spark;
-  if (!film.readout) head.style.display = 'none';
+  // no readout: keep the badge (state / GERAK LAMBAT) but drop the number and the sparkline
+  if (!film.readout) { document.getElementById('bd-read').style.visibility = 'hidden'; if (spark) spark.style.visibility = 'hidden'; }
   if (sp && spark) {
     const lines = (sp.lines || []).map(v => `<line class="thr" x1="0" x2="250" /><text class="thr-t" x="256">${fmt(v, 0)}</text>`).join('');
     spark.innerHTML = lines + '<path class="tr" d=""/><circle class="dot" r="5"/>';
@@ -81,6 +103,16 @@
   STYLE.frame = function (t, si) {
     if (film.frame) film.frame(t, si);
     glows.forEach(g => { const k = B.clamp01(g.k(t)); g.mats.forEach(([m, base]) => m.color.copy(base).lerp(g.target, k)); });
+    pops.forEach(P => {
+      const k = (t - P.at) / P.dur;
+      P.obj.visible = k > 0;
+      const e = k <= 0 ? 0.001 : k >= 1 ? 1 : (1 - Math.pow(1 - k, 3)) + Math.sin(k * Math.PI) * 0.18;
+      P.obj.scale.copy(P.base).multiplyScalar(Math.max(e, 0.001));
+    });
+    flashes.forEach(F => {
+      const k = B.clamp01((t - F.at) / F.dur), e = t < F.at ? 0 : Math.sin(k * Math.PI) * 0.9;
+      F.mats.forEach(m => { m.emissive.copy(F.color).multiplyScalar(e); });
+    });
     stage.scene.updateMatrixWorld();
     labels.forEach(L => {
       const k = B.clamp01((t - L.from) / 0.3) * (1 - B.clamp01((t - L.to) / 0.2));

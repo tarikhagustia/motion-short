@@ -424,6 +424,44 @@ def s_beep3(d, r):
     return out
 
 
+def s_zap(d, r):
+    """Electric shock zzzt: buzzing 100 Hz-ish harmonics with crackle, fast on/off flutter."""
+    d = d or 0.8
+    t = t_axis(d)
+    buzz = np.sign(np.sin(2 * np.pi * 110 * t)) * 0.4 + np.sin(2 * np.pi * 330 * t) * 0.3
+    crackle = hp(noise(d, r), 2500) * (r.random(len(t)) > 0.96) * 2.0
+    flutter = 0.5 + 0.5 * (np.sin(2 * np.pi * 23 * t) > -0.2)
+    x = (lp(buzz, 3500) + crackle) * flutter * np.minimum(t / 0.01, 1) * np.exp(-t * 1.5)
+    return norm(x, 0.75)
+
+
+def s_spark(d, r):
+    """Short-circuit: sharp crack + sizzle tail."""
+    d = d or 0.9
+    t = t_axis(d)
+    crack = hp(noise(0.03, r), 1200) * env_ad(int(0.03 * SR), 0.02, 5)
+    sizzle = bp(noise(d, r), 3000, 10000) * np.exp(-t * 4) * (0.6 + 0.4 * (r.random(len(t)) > 0.7))
+    x = sizzle * 0.6
+    x[: len(crack)] += crack * 1.5
+    return norm(x, 0.85)
+
+
+def s_rewind(d, r):
+    """Tape rewind: fast chattering pitch sweep downward then up."""
+    d = d or 0.9
+    t = t_axis(d)
+    f = lambda tt: 300 + 1600 * np.abs(np.sin(np.pi * tt / d))
+    x = sine(f, d) * 0.35 * (0.6 + 0.4 * np.sign(np.sin(2 * np.pi * 38 * t))) + bp(noise(d, r), 1500, 6000) * 0.25
+    return norm(x * np.sin(np.pi * t / d) ** 0.6, 0.7)
+
+
+def s_ding(d, r):
+    """Small bell ding (lamp on, notification)."""
+    d = d or 1.2
+    x = (sine(1568, d) + 0.5 * sine(1568 * 2.76, d) + 0.25 * sine(1568 * 5.4, d)) * env_ad(int(d * SR), 0.003, 6)
+    return x * 0.45
+
+
 def s_boil(d, r):
     """Water boiling / simmering: many small bubble pops over a low rumble."""
     d = d or 2.0
@@ -436,13 +474,248 @@ def s_boil(d, r):
     return norm(out, 0.6)
 
 
+# --- lifting / lift foley (pulley, rope, motor, rails, safety gear, crowd)
+def s_creak(d, r):
+    """Wooden pulley creak: slow stick-slip squeaks with a woody resonance."""
+    d = d or 1.4
+    out = np.zeros(int(d * SR))
+    t0 = 0.0
+    while t0 < d - 0.15:
+        sd = r.uniform(0.12, 0.3)
+        f0 = r.uniform(380, 620)
+        tt = t_axis(sd)
+        ph = 2 * np.pi * np.cumsum(f0 * (1 + 0.25 * np.sin(2 * np.pi * 7 * tt)) * (1 + 0.15 * tt / sd)) / SR
+        pulses = (np.sin(ph) > 0.92).astype(float)          # stick-slip pulse train
+        g = bp(pulses, 300, 2600) * np.sin(np.pi * tt / sd) ** 0.8
+        a = int(t0 * SR)
+        out[a:a + len(g)] += g[: len(out) - a] * r.uniform(0.6, 1.0)
+        t0 += sd + r.uniform(0.05, 0.25)
+    return norm(out, 0.7)
+
+
+def s_rope(d, r):
+    """Rope rubbing / tightening: dry fibrous friction noise in bursts."""
+    d = d or 1.0
+    t = t_axis(d)
+    x = bp(noise(d, r), 900, 5000) * (0.5 + 0.5 * np.abs(np.sin(2 * np.pi * 3.2 * t)))
+    x *= 0.7 + 0.3 * (r.random(len(t)) > 0.5)
+    return norm(x * np.minimum(t / 0.05, 1) * np.minimum((d - t) / 0.2, 1), 0.55)
+
+
+def s_drip(d, r):
+    """Water drops falling from a bucket: a few plinks with pitch blips."""
+    d = d or 2.0
+    out = np.zeros(int(d * SR))
+    k_n = max(2, int(d * 2.2))
+    for k in range(k_n):
+        f0 = r.uniform(900, 1500)
+        b = sine(lambda tt: f0 * (1 + 2.5 * tt / 0.06), 0.06) * env_ad(int(0.06 * SR), 0.02, 7)
+        a = int((k * d / k_n + r.uniform(0, 0.12)) * SR)
+        if a < len(out):
+            out[a:a + len(b)] += b[: len(out) - a] * r.uniform(0.4, 0.8)
+    return out * 0.6
+
+
+def s_breath(d, r):
+    """Heavy straining breath: two pulled-in breaths and a strained exhale."""
+    d = d or 1.6
+    out = np.zeros(int(d * SR))
+    for at, dur, lo, hi, v in ((0.0, 0.35, 500, 2500, 0.6), (0.45, 0.3, 500, 2600, 0.6), (0.85, d - 0.85, 250, 1500, 1.0)):
+        if dur <= 0.05:
+            continue
+        tt = t_axis(dur)
+        g = bp(noise(dur, r), lo, hi) * np.sin(np.pi * tt / dur) ** 1.2 * v
+        if v == 1.0:   # voiced strain on the exhale
+            g += sine(lambda x: 140 + 20 * np.sin(2 * np.pi * 6 * x), dur) * 0.15 * np.sin(np.pi * tt / dur)
+        a = int(at * SR)
+        out[a:a + len(g)] += g[: len(out) - a]
+    return norm(out, 0.6)
+
+
+def _motor(d, f_of_t, r, rough=0.0):
+    t = t_axis(d)
+    ph = 2 * np.pi * np.cumsum(f_of_t(t)) / SR
+    x = np.zeros(len(t))
+    for k in range(1, 10):
+        x += np.sin(ph * k) / k ** 1.2
+    return lp(x, 1400) + bp(noise(d, r), 120, 900) * (0.08 + rough)
+
+
+def s_motor(d, r):
+    """Electric hoist motor: spins up from rest to a steady smooth hum (100 Hz-ish)."""
+    d = d or 2.0
+    t = t_axis(d)
+    x = _motor(d, lambda tt: 50 + 50 * (1 - np.exp(-tt * 3.0)), r)
+    e = np.minimum(t / 0.15, 1) * np.minimum((d - t) / 0.3, 1)
+    return norm(x * e, 0.55)
+
+
+def s_strain(d, r):
+    """Overloaded motor: low groaning pitch that sags, with sputter/cough drop-outs."""
+    d = d or 2.4
+    t = t_axis(d)
+    x = _motor(d, lambda tt: 62 - 14 * np.minimum(tt / d, 1) + 5 * np.sin(2 * np.pi * 1.3 * tt), r, rough=0.25)
+    gate = np.ones(len(t))
+    for c in (0.55, 0.95, 1.6):                              # coughs
+        if c < d - 0.1:
+            a, b = int(c * SR), int((c + 0.09) * SR)
+            gate[a:b] = 0.15
+            kk = hp(noise(0.06, r), 300) * env_ad(int(0.06 * SR), 0.05, 6)
+            x[b:b + len(kk)] += kk[: len(x) - b] * 2.0
+    e = np.minimum(t / 0.1, 1) * np.minimum((d - t) / 0.3, 1)
+    return norm(lp(x * gate, 3000) * e, 0.7)
+
+
+def s_glide(d, r):
+    """Smooth glide along rails: soft airy hiss with a faint roller hum."""
+    d = d or 1.8
+    t = t_axis(d)
+    x = bp(noise(d, r), 600, 3500) * 0.6 + sine(180, d) * 0.08
+    return norm(x * np.sin(np.pi * t / d) ** 1.5, 0.45)
+
+
+def s_fray(d, r):
+    """Rope fibres creaking and popping as they unravel: tension creak + sparse fibre ticks, rising."""
+    d = d or 1.8
+    t = t_axis(d)
+    x = s_creak(d, r) * 0.5
+    ticks = hp(noise(d, r), 3000) * (r.random(len(t)) > 1 - (0.002 + 0.02 * t / d))
+    x = x + lp(ticks, 9000) * 1.6
+    return norm(x * (0.4 + 0.6 * t / d), 0.65)
+
+
+def s_snap(d, r):
+    """Rope snapping: loud whip-crack transient + low thump + short recoil whoosh."""
+    d = d or 0.8
+    t = t_axis(d)
+    crack = hp(noise(0.02, r), 1500) * env_ad(int(0.02 * SR), 0.01, 4)
+    thump = sine(lambda tt: 160 * np.exp(-tt * 18) + 45, d) * env_ad(len(t), 0.004, 9) * 0.8
+    whip = bp(noise(d, r), 800, 4000) * np.exp(-t * 7) * 0.4
+    x = thump + whip
+    x[: len(crack)] += crack * 2.2
+    return norm(x, 0.95)
+
+
+def s_fall(d, r):
+    """Falling: rushing wind getting louder and higher."""
+    d = d or 1.6
+    t = t_axis(d)
+    k = t / d
+    x = bp(noise(d, r), 200, 900) * (1 - k) + bp(noise(d, r), 1200, 5000) * k * 0.9
+    return norm(x * np.minimum(t / 0.1, 1) * (0.3 + 0.7 * k), 0.7)
+
+
+def s_spin(d, r):
+    """Governor wheel spinning faster: whirring tone rising in pitch with a clicking ratchet."""
+    d = d or 1.6
+    t = t_axis(d)
+    ph = np.cumsum(8 + 34 * (t / d) ** 1.6) / SR             # clicks per second rising
+    clicks = np.nonzero(np.diff(np.floor(ph), prepend=0) > 0)[0]
+    out = np.zeros(len(t))
+    tk = hp(noise(0.006, r), 2500) * env_ad(int(0.006 * SR), 0.05, 5)
+    for i in clicks:
+        out[i:i + len(tk)] += tk[: len(out) - i] * 0.6
+    whirr = sine(lambda tt: 180 + 700 * (tt / d) ** 1.4, d) * 0.18
+    return norm((out + whirr) * np.minimum(t / 0.1, 1), 0.65)
+
+
+def s_klang(d, r):
+    """Heavy steel latch locking: bright metallic clang with inharmonic ring."""
+    d = d or 1.2
+    n = int(d * SR)
+    x = np.zeros(n)
+    for f, v, dc in ((523, 0.5, 5), (1236, 0.35, 7), (1870, 0.3, 9), (2810, 0.2, 11), (3950, 0.12, 14)):
+        x += sine(f, d) * v * env_ad(n, 0.001, dc)
+    hit = hp(noise(0.015, r), 1500) * env_ad(int(0.015 * SR), 0.02, 4)
+    x[: len(hit)] += hit * 1.5
+    x += sine(lambda tt: 120 * np.exp(-tt * 20) + 60, d) * env_ad(n, 0.003, 10) * 0.6
+    return norm(x, 0.9)
+
+
+def s_screech(d, r):
+    """Steel clamps gripping the rail: harsh metal-on-metal screech with sparks, falling in pitch."""
+    d = d or 1.3
+    t = t_axis(d)
+    ph = 2 * np.pi * np.cumsum(2300 - 900 * t / d + 120 * np.sin(2 * np.pi * 31 * t)) / SR
+    tone = np.sin(ph) + 0.5 * np.sin(2.03 * ph) + 0.3 * np.sin(3.1 * ph)
+    grit = bp(noise(d, r), 2500, 9000) * 0.6
+    sparks = hp(noise(d, r), 4000) * (r.random(len(t)) > 0.985) * 1.5
+    e = np.minimum(t / 0.02, 1) * np.exp(-np.maximum(t - d * 0.6, 0) * 8)
+    return norm((tone * 0.5 + grit + sparks) * e, 0.85)
+
+
+def s_chop(d, r):
+    """Axe biting into rope/wood: dull thock + splinter crack."""
+    d = d or 0.5
+    n = int(d * SR)
+    x = sine(lambda tt: 260 * np.exp(-tt * 25) + 90, d) * env_ad(n, 0.003, 12)
+    x += bp(noise(d, r), 600, 3000) * env_ad(n, 0.003, 18) * 0.8
+    sp = hp(noise(0.05, r), 2500) * env_ad(int(0.05 * SR), 0.05, 8)
+    a = int(0.02 * SR)
+    x[a:a + len(sp)] += sp * 0.6
+    return norm(x, 0.95)
+
+
+def s_gasp(d, r):
+    """Crowd holding its breath: many short inhaled 'hh' noises, then near silence."""
+    d = d or 1.2
+    out = np.zeros(int(d * SR))
+    w = t_axis(0.25)
+    for _ in range(18):
+        g = bp(noise(0.25, r), r.uniform(700, 1100), r.uniform(2500, 4500)) * np.sin(np.pi * w / 0.25) ** 0.6
+        a = int(r.uniform(0, 0.15) * SR)
+        out[a:a + len(g)] += g[: len(out) - a] * r.uniform(0.3, 0.7)
+    return norm(out, 0.55)
+
+
+def s_cheer(d, r):
+    """Crowd cheering and applause swelling up then settling."""
+    d = d or 2.4
+    t = t_axis(d)
+    clap = np.zeros(len(t))
+    for _ in range(int(d * 90)):
+        c = bp(noise(0.02, r), 900, 5000) * env_ad(int(0.02 * SR), 0.05, 6)
+        a = int(r.uniform(0, d - 0.03) * SR)
+        clap[a:a + len(c)] += c[: len(clap) - a] * r.uniform(0.3, 1.0)
+    voices = np.zeros(len(t))
+    for _ in range(10):
+        f0, fv = r.uniform(180, 420), r.uniform(2, 5)
+        voices += sine(lambda tt: f0 * (1 + 0.08 * np.sin(2 * np.pi * fv * tt) + 0.15 * np.exp(-tt * 2)), d) * r.uniform(0.2, 0.5)
+    voices = bp(voices + noise(d, r) * 0.3, 250, 3000)
+    e = np.minimum(t / 0.25, 1) * (1 - 0.5 * t / d) * np.minimum((d - t) / 0.5, 1)
+    return norm((clap * 0.8 + voices * 0.5) * e, 0.7)
+
+
+def s_ting(d, r):
+    """Lift arrival chime: one clear bell 'ting' with a long ring."""
+    d = d or 1.6
+    n = int(d * SR)
+    x = (sine(1318.5, d) + 0.45 * sine(2637, d) + 0.18 * sine(1318.5 * 4.2, d) * env_ad(n, 0.001, 20)) * env_ad(n, 0.002, 4)
+    return x * 0.5
+
+
+def s_door(d, r):
+    """Lift doors sliding open: soft motor whirr + airy hiss + gentle end bump."""
+    d = d or 1.2
+    t = t_axis(d)
+    x = bp(noise(d, r), 400, 2500) * np.sin(np.pi * t / d) ** 1.2 * 0.6 + sine(240, d) * 0.05 * np.sin(np.pi * t / d)
+    b = sine(lambda tt: 140 * np.exp(-tt * 20) + 60, 0.15) * env_ad(int(0.15 * SR), 0.01, 8) * 0.4
+    a = int((d - 0.15) * SR)
+    x[a:a + len(b)] += b[: len(x) - a]
+    return norm(x, 0.5)
+
+
 ONESHOT = {
     "whoosh": s_whoosh, "swoosh": lambda d, r: s_whoosh(d or 0.45, r, hi=True), "pop": s_pop, "click": s_click,
     "tick": s_tick, "ticks": s_ticks, "chime": s_chime, "shimmer": s_shimmer, "sparkle": s_shimmer,
     "impact": s_impact, "thud": s_impact, "crash": s_impact, "boom": s_boom, "explosion": s_boom,
     "rumble": s_rumble, "scribble": s_scribble, "paper": s_paper, "page": s_page, "bubbles": s_bubbles,
     "klik": s_klik, "latch": s_klik, "hiss": s_hiss, "steam": s_hiss, "rev": s_rev, "relay": s_relay,
-    "beep3": s_beep3, "boil": s_boil,
+    "creak": s_creak, "rope": s_rope, "drip": s_drip, "breath": s_breath, "motor": s_motor, "strain": s_strain,
+    "glide": s_glide, "fray": s_fray, "snap": s_snap, "fall": s_fall, "spin": s_spin, "klang": s_klang, "clang": s_klang,
+    "screech": s_screech, "chop": s_chop, "axe": s_chop, "gasp": s_gasp, "cheer": s_cheer, "applause": s_cheer,
+    "ting": s_ting, "door": s_door,
+    "beep3": s_beep3, "boil": s_boil, "zap": s_zap, "spark": s_spark, "rewind": s_rewind, "ding": s_ding,
     "beep": s_beep, "blip": s_blip, "data": s_data, "glitch": s_glitch, "scan": s_scan, "alarm": s_alarm,
     "heartbeat": s_heartbeat, "thunder": s_thunder, "scream": lambda d, r: s_scream(d or 1.2, r), "screams": s_screams, "gong": s_gong, "pluck": s_pluck, "splash": s_splash, "rise": s_rise, "drop": s_drop,
 }
@@ -685,7 +958,46 @@ def m_bedah(dur, r):
     return lp(out[: int(dur * SR)], 9000)
 
 
-MUSIC = {"emas": m_emas, "buku": m_buku, "hud": m_hud, "lukis": m_lukis, "bedah": m_bedah}
+def m_kuno(dur, r):
+    """Old-time parlour waltz (1850s feel): soft piano oom-pah-pah in F major with a reedy accordion
+    melody, slightly detuned, low-passed like an old record, faint crackle. For history flashbacks."""
+    out = np.zeros(int(dur * SR) + SR)
+    beat = 0.5                                              # 120 bpm waltz
+    chords = [(53, 57, 60), (48, 55, 58), (48, 52, 55), (53, 57, 60), (46, 50, 53), (53, 57, 60), (48, 52, 58), (53, 57, 60)]
+    mel = [72, 74, 72, 70, 69, 67, 69, 70, 72, 74, 76, 77, 76, 74, 72, 70, 69, 67, 65, 67, 69, 72, 70, 69]
+
+    def piano(f, d, v):
+        x = (sine(f, d) + 0.5 * sine(f * 2.003, d) + 0.2 * sine(f * 3.01, d)) * env_ad(int(d * SR), 0.004, 5)
+        return lp(x, 2400) * v
+
+    def reed(f, d, v):
+        tt = t_axis(d)
+        x = np.zeros(len(tt))
+        for det in (1.0, 1.004):
+            for k in (1, 2, 3):
+                x += np.sign(np.sin(2 * np.pi * f * det * k * tt)) / k ** 1.6
+        e = np.minimum(tt / 0.06, 1) * np.minimum((d - tt) / 0.1, 1) * (1 + 0.06 * np.sin(2 * np.pi * 5 * tt))
+        return lp(x, 1800) * e * v
+
+    t, i = 0.0, 0
+    while t < dur:
+        a = int(t * SR)
+        ch = chords[(i // 3) % len(chords)]
+        if i % 3 == 0:
+            x = piano(midi(ch[0] - 12), beat * 1.6, 0.20)
+            m = reed(midi(mel[(i // 3) % len(mel)]), beat * 2.8, 0.045)
+            out[a:a + len(m)] += m[: len(out) - a]
+        else:
+            x = sum(piano(midi(n), beat * 0.9, 0.06) for n in ch)
+        out[a:a + len(x)] += x[: len(out) - a]
+        t += beat
+        i += 1
+    n = len(out)
+    out += hp(r.standard_normal(n), 3000) * (r.random(n) > 0.9993) * 0.25
+    return lp(out[: int(dur * SR)], 5000)
+
+
+MUSIC = {"kuno": m_kuno, "emas": m_emas, "buku": m_buku, "hud": m_hud, "lukis": m_lukis, "bedah": m_bedah}
 
 
 # ---------------------------------------------------------------- mixing
@@ -848,6 +1160,60 @@ def build_scary(sb, tl):
     return out[: int(dur * SR)]
 
 
+def apply_music_mute(m, sb, tl):
+    """storyboard music_mute: [[sid, word|null, sid, word|null], ...] -> the bed is silent between the two
+    points (null word = scene start), with 0.25 s fades. For dramatic silences (the music stops, then returns)."""
+    m = m.copy()
+    fade_n = int(0.25 * SR)
+    def at(sid, word):
+        if word:
+            t = word_at(tl, sid, word)
+            if t is not None:
+                return t
+            print(f"  ! music_mute: word '{word}' not found in {sid}, using scene start")
+        sc = next((x for x in tl["scenes"] if x["id"] == sid), None)
+        return sc["start"] if sc else 0.0
+    for a_sid, a_w, b_sid, b_w in sb["music_mute"]:
+        a, b = int(at(a_sid, a_w) * SR), int(at(b_sid, b_w) * SR)
+        if b <= a:
+            continue
+        g = np.ones(len(m))
+        g[a:b] = 0
+        g[max(a - fade_n, 0):a] = np.linspace(1, 0, a - max(a - fade_n, 0))
+        g[b:min(b + fade_n, len(m))] = np.linspace(0, 1, min(b + fade_n, len(m)) - b)
+        m = m * g if m.ndim == 1 else m * g[:, None]
+    return m
+
+
+def apply_music_layers(m, sb, tl):
+    """storyboard music_layers: [{"preset": "kuno", "from": [sid, word|null], "to": [sid, word|null], "volume": 1}]
+    -> another bed plays only in that window (0.4 s fades), e.g. an old-time waltz for a history flashback
+    while the main bed is muted there with music_mute."""
+    m = m.copy() if m is not None else np.zeros(int(tl["duration"] * SR))
+    def at(sid, word):
+        t = word_at(tl, sid, word) if word else None
+        if t is None:
+            sc = next((x for x in tl["scenes"] if x["id"] == sid), None)
+            t = sc["start"] if sc else 0.0
+        return t
+    for L in sb["music_layers"]:
+        a, b = at(*L["from"]), at(*L["to"])
+        if b <= a:
+            continue
+        x = build_music(L["preset"], b - a + 0.5)
+        if x is None:
+            print(f"  ! music_layers: unknown preset {L['preset']}")
+            continue
+        x = x[: int((b - a) * SR)] * L.get("volume", 1.0)
+        f = min(int(0.4 * SR), len(x) // 2)
+        x[:f] *= np.linspace(0, 1, f)
+        x[len(x) - f:] *= np.linspace(1, 0, f)
+        i = int(a * SR)
+        seg = m[i:i + len(x)]
+        m[i:i + len(seg)] = seg + (x[: len(seg)] if seg.ndim == 1 else x[: len(seg), None])
+    return m
+
+
 def build_music(preset, dur):
     fn = MUSIC.get(preset)
     if not fn:
@@ -880,6 +1246,10 @@ def main():
     if not args.no_music:
         preset = sb.get("music", STYLE_MUSIC.get(sb.get("style", ""), "none"))
         m = build_music(preset, tl["duration"])
+        if m is not None and sb.get("music_mute"):
+            m = apply_music_mute(m, sb, tl)
+        if sb.get("music_layers"):
+            m = apply_music_layers(m, sb, tl)
         if m is not None:
             write_wav(adir / "music.wav", m)
             res["music"] = str(adir / "music.wav")

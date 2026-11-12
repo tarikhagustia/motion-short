@@ -108,11 +108,12 @@ def main():
         t = cut / f"{sc['id']}.wav"
         trim_silence(c, t)
         clips.append(t)
-    gap = args.gap
+    # pause after each scene: storyboard scene "gap_after" (s) for a held silence, else --gap
+    gaps = [float(sc.get("gap_after", args.gap)) for sc in sb["scenes"]]
     cmd = ["ffmpeg", "-y", "-v", "error"]
     for c in clips:
         cmd += ["-i", str(c)]
-    filt = "".join(f"[{i}:a]apad=pad_dur={gap if i < len(clips) - 1 else 0.05}[p{i}];" for i in range(len(clips)))
+    filt = "".join(f"[{i}:a]apad=pad_dur={gaps[i] if i < len(clips) - 1 else 0.05}[p{i}];" for i in range(len(clips)))
     filt += "".join(f"[p{i}]" for i in range(len(clips))) + f"concat=n={len(clips)}:v=0:a=1"
     if abs(args.speed - 1.0) > 0.001:
         filt += f",atempo={args.speed:.3f}"
@@ -123,7 +124,7 @@ def main():
 
     # scene boundaries in the joined file
     durs = [len(decode(c)) / 16000 for c in clips]
-    starts = [0.15 + sum(durs[:i]) + gap * i for i in range(len(durs))]
+    starts = [0.15 + sum(durs[:i]) + sum(gaps[:i]) for i in range(len(durs))]
     starts = [0.15 + (s - 0.15) / args.speed for s in starts]
 
     # 3. Whisper word timings, one scene clip at a time (a single pass over a long take can skip

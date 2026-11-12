@@ -26,6 +26,7 @@ motion-shorts/
 │   ├── svgkit.py            generic animated pieces (sky, trees, people, water, fire, ...)
 │   ├── sound.py             procedural SFX + style music bed -> audio/sfx.wav, audio/music.wav
 │   ├── render.py            stills / full render / remux
+│   ├── refs.py              reference photos (Wikimedia Commons) + contact sheets for modelling real objects
 │   ├── hyperframes.py       lukis only: HyperFrames composition (hf/) + check + render (~2.4x faster)
 │   └── omnivoice_tts.py     OmniVoice client (used by voice.py)
 ├── styles/
@@ -87,13 +88,23 @@ header, dark caption pill with the word on yellow, comic onomatopoeia, lo-fi bed
    Whisper aligns each scene clip on its own, so every word lands in its scene.
    Redo one scene: `voice.py --only s04`. If OmniVoice is unreachable, say so; `build_timeline.py`
    then estimates timing and the video can be rendered silent.
+   **Real objects first (bedah, and any video that shows real devices, appliances or buildings)**: before
+   modelling, research how the things really look and how they are really installed. Run
+   `python scripts/refs.py projects/<slug> "item=query1;query2" ...` (Wikimedia Commons photos + contact
+   sheets in `projects/<slug>/refs/`), look at every sheet, read how the system is installed in Indonesia
+   (PLN/PUIL/manufacturer material), and write `refs/SPEK.md`: per object the real size in metres,
+   colours, visible parts, where and how high it is mounted, and the real wiring/plumbing route. Model from
+   the spec, check each object in a small gallery render next to its photo, then build the scenes.
+   Reuse `styles/bedah/lib/40-listrik.js` (household electrical equipment) and `30-rumah.js` (house).
 5. **Scenes**: write `projects/<slug>/gen_scenes.py` that imports `svgkit`, the style `kit.py` and
    `timing.Timing`, writes `scenes/sNN.svg`, and writes each scene's `texts` (titles/stats/tags)
    back into the storyboard. Time every story action to its word with `T.at(sid, "word")`.
    Spend the effort here: full frame, big subject, 4+ ambient motions, one story action per
    scene on its word, a camera move. Draw the topic-specific subject by hand at kit quality.
    **bedah** needs no scene art either: write `projects/<slug>/model.js` (the 3D object, cut, shots,
-   callouts, glows, readout; contract in `styles/bedah/guide.md`, template `projects/termos-bedah/`),
+   callouts, glows, readout; contract in `styles/bedah/guide.md`, templates `projects/termos-bedah/`
+   (toon, one object), `projects/listrik-rumah-aman/` (clay, house built up, `BEDAH.rumah`) and
+   `projects/lift-bongkar/` (clay, machine built up, building section `BEDAH.gedung`, sepia flashback)),
    and `gen_scenes.py` writes empty SVGs + one beat title per scene + `bunyi` words.
    **lukis** needs no scene art: `gen_scenes.py` only writes empty SVGs + `texts`; the painting comes
    from `storyboard.paint` and per-scene `paint` segments (volcano, twilight town/fjord/beach, globe). Put
@@ -127,9 +138,11 @@ header, dark caption pill with the word on yellow, comic onomatopoeia, lo-fi bed
 - Scary mode is for events that really were deadly (eruptions, tsunamis); keep the narration factual
   and calm, let picture and sound carry the dread. Never use it for jokes or living victims.
 - Misteri: label every theory as a theory; never present myths or conspiracies as fact.
-- Bedah: the turn is always "Kok bisa? Kita cek rahasianya." and the last scene is always the CTA
-  "Mau dicek rahasia apa lagi? Tulis di kolom komentar." (`genres.md` §bedah). The upload text asks the
-  same question.
+- Bedah: the turn is "Kok bisa? Kita cek rahasianya." (except the "Ini namanya…" series variant, which
+  ends each beat on "… ini namanya X" instead) and the last scene is always the CTA
+  "Mau dicek rahasia apa lagi? Tulis di kolom komentar." (`genres.md` §bedah). In the series "Bongkar" (a
+  machine built up step by step) the closer is "Habis ini kita mau cek rahasia apa? Tulis di kolom komentar."
+  instead — never two questions in a row. The upload text asks the same question.
 - New look ideas go into the look pack (css/overlay/kit), not into one video, so later videos
   inherit them. A new look = a new folder under `styles/` with the same files. A new gaya = a new
   section in `genres.md` (and a row in the table above), mapped to an existing or new look.

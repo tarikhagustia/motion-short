@@ -21,6 +21,11 @@ Top level: `topic`, `genre` (`dokumenter` | `sains` | `misteri` | `explainer` | 
 `style` (`emas` | `buku` | `hud` | `lukis` | `bedah`), optional overrides of the style defaults
 (`caption_style`, `caption_y`, `title_color`, `title_anim`, `title_size`, `title_y`, `letter_delay`, `fade`, `music`),
 `chrome` (hud header values: `sim`, `title`, `footer`, `clock_rate`, `clock_label`), `auto_whoosh`,
+`music_mute` (`[[sid, word|null, sid, word|null]]`: the music bed is silent between the two points),
+`music_layers` (`[{"preset": "kuno", "from": [sid, word|null], "to": [sid, word|null], "volume": 1}]`: another
+bed plays only in that window, e.g. the old-time `kuno` waltz for a history flashback while `music_mute`
+silences the main bed), per scene `gap_after` (seconds of silence after that scene's narration, e.g. a held
+silence after "berhenti" or room for a "ting"; default `voice.py --gap`),
 `paint` (lukis painter: `scene`, `seed`, `zoom`, `ramp`, `puffs`, `flash_words`, `lightning`, `scary`,
 `blast_words`; full list in `styles/lukis/guide.md`). Word lists are `[[sid, word, offset]]`; the same
 resolver (`sound.paint_times`) is used by style.js, sound.py and hyperframes.py so picture and sound line up.
@@ -89,7 +94,8 @@ the SVG animations (lukis uses it to repaint the canvas and shake the text).
 
 A look may ship `lib/*.js` (inlined first, in name order; bedah: `00-three.min.js` r149 + `10-stage.js`);
 a project may ship `model.js` (inlined after the libs, before the look's `style.js`). bedah uses this:
-the page draws a WebGL canvas (SwiftShader in headless Chromium, ~0.2-0.4 s per frame) under the titles.
+the page draws a WebGL canvas under the titles. Headless Chromium runs WebGL on the real GPU
+(`--use-angle=d3d11` on Windows); `render.py --cpu` falls back to SwiftShader (~0.2-0.4 s per frame).
 
 ## HyperFrames (lukis)
 

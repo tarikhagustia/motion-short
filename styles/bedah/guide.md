@@ -30,6 +30,68 @@ flat and outlined, so it looks like a technical illustration that moves. Scene S
 - **Music**: `bedah` soft lo-fi bed (92 bpm); the object's own foley is loud and on the word: `klik`,
   `hiss`, `rev`, `relay`, `beep3`, `boil`, plus `pop`/`whoosh` for callouts and cuts.
 
+## Clay variant (`BEDAH_OPTS.look = 'clay'`)
+
+Soft toy-like render for house / room scale stories: `MeshStandardMaterial` (matte, warm), soft
+shadows from one key light (`shadowSize`, `shadowMap` options), no ink outlines, cream ground
+(`ground: 0xf3ece0`), the header fade turns cream. Use `B.rbox(w, h, d, r, 1, bevel)` with a small bevel
+for rounded clay edges. `render.py` uses the real GPU (ANGLE/D3D11); on SwiftShader (`--cpu`, no GPU)
+clay is slow (≈ 3 frames/s: a 60 s video ≈ 10 min). Keep the shadow map at 1024.
+
+Camera framing at house scale (9:16 is narrow): the whole 7×8 m house needs zoom ≈ 0.42; a single
+room ≈ 0.9; a top-down floor plan zoom 0.5 with pitch 0.8 (pitch 1 = blown-out floor + long wall
+shadows); a device close-up 15–30. Interpolate zoom in log space when keys jump from 0.4 to 30
+(`kf` on `Math.log(zoom)`, then `Math.exp`, and copy the array `kf` returns, it can be the key itself),
+or the in-between frames sit far too close (a screen full of roof tiles). Check stills between keys,
+not only on them.
+
+`lib/30-rumah.js` — `BEDAH.rumah(S)` builds a reusable dollhouse cutaway: soil block cut open at the
+front (the camera can go "through the floor"), wood floor, three rooms (kamar L, dapur M, ruang R),
+back roof slope + gables, power pole, hanging bulbs. Returns `{ group, roof, rooms, light(name|'all',
+k), darkness(name|'all', k), anchors: {meter, panel, kitchen, washer, roofRod, soilRod, poleTop, …},
+cut }`. Call `stage.setCut(R.cut)` every frame and `R.roof.visible = false` for top-down shots.
+
+Camera for houses: wide shots isometric (yaw 0); interior close-ups need `yaw ≈ -0.6` (look in through
+the open front), or walls hide low objects; a hero close-up straight on uses `yaw ≈ -0.68`;
+`pitch 1` = top-down (floor plan). `stage.setCamera(target, zoom, yaw, pitch, S.shake(t, keys))`.
+
+More helpers:
+- `stage.cable(points, {r, color, core, particleColor, n, opacity})` → transparent cable with a copper
+  core; `.grow(k)` draws the first k of it (a cable sliding in), `.flow(t, {on, speed, color, reach})`
+  moves glowing particles inside (yellow = normal current; set `color` red for overload).
+- `stage.setDim(k)` dims all lights (power cut), `stage.setSky(color)` (storm).
+- `S.flash(obj, at, color, dur)` short emissive glint (blue = solution), `S.danger(obj, a, b)` red,
+  `S.popIn(obj, at)` bounce in (or write your own presence function when the object must exist at the
+  hook too, see `listrik-rumah-aman`), `S.shake(t, [[t, amp], …])` → camera shake offset.
+- Storyboard `music_mute: [[sid, word|null, sid, word|null]]` silences the music bed between two points
+  (a held silence after a decisive click). SFX for electricity: `zap`, `spark`, `klik`, `relay`,
+  `hum` (ambience), `rewind`, `ding`, `thunder`, `rumble`, `heartbeat`.
+
+## Real-object workflow (do this before modelling)
+
+1. **Research**: `python scripts/refs.py projects/<slug> "item=q1;q2" …` downloads reference photos and
+   makes `refs/sheet_<item>.png`. Look at each sheet (and one full-size photo of the hero object). Also read
+   how it is installed in Indonesia (PLN, PUIL, the manufacturer's manual): order of parts, mounting height,
+   cable routes.
+2. **Spec**: write `projects/<slug>/refs/SPEK.md` — per object: real size (m), colours, visible parts
+   (display, keys, labels, terminals, seals), mounting point and height; the real installation route.
+3. **Model to scale** (1 unit = 1 m) from the spec. Proportions first, then the details that make it
+   recognisable (keypad + green enter on a prepaid meter, TEST button on an RCCB, louvre on an AC…); draw
+   printed faces as canvas textures, brand-free.
+4. **Gallery check**: render each object alone (`projects/_galeri-listrik` pattern) and compare with its
+   photo before using it in the film. Fix shape and proportion problems here, not in the film.
+5. **House/scene check**: render stills from every planned camera angle; make sure walls, ceiling or
+   roof do not block the subject (interior shots: `pitch -1`, `yaw -0.68`).
+
+Library: `lib/40-listrik.js` — `BEDAH.listrik(S)` → `kwhMeter()` (prepaid, `.userData.setDisplay`,
+`.leds`), `mcb({label, sub, toggle})`, `rccb()`, `boxMcb({modules})` (`.userData.modules[i].userData.lever`),
+`pole()`, `earthRod({len})`, `splitzen()`, `acSplit()`, `fridge()`, `riceCooker()`, `washer()`, `socket()`,
+`lightSwitch()`, `ceilingLamp()` (`.userData.bulbMat`), `hand()`, `tex(w, h, draw)`.
+`lib/30-rumah.js` — `BEDAH.rumah(S)`: 7×8 m perumahan house in metres (clay-tile gable roof facing the
+street, trusses, plafon, keramik floor, windows with kusen, partitions with doorways, soil block), dollhouse
+cut at z = 3 (`setCut(R.cut)`), roof + ceiling lid `R.lift(k)`, `R.light/darkness(room, k)`, anchors for
+the meter, box MCB, AC, fridge, counter, washer, sockets, earth rods and the roof rod.
+
 ## Project files
 
 ```
@@ -40,6 +102,27 @@ projects/<slug>/
 ```
 
 Template: `projects/termos-bedah/` (vacuum flask; lathe bodies, wedge cut, particles, labels, glows).
+Template (clay, a house built up step by step, loop ending): `projects/listrik-rumah-aman/`.
+Template (clay, a machine built up from a bucket and pulley, two "sets" swapped mid-film, a camera that rides
+with a moving part, a 2D sepia history scene, a reveal into a lobby): `projects/lift-bongkar/`.
+
+`lib/45-lift.js` — `BEDAH.lift(S)`: `rope(r, 'hemp'|'wire')` (`.userData.set(a, b)` each frame),
+`ropeArc(R, r, a0, a1)`, `bucket()`, `woodPulley()`, `machine({r})` (traction machine, `.userData.wheel`),
+`sheave({r})`, `rail(len, dir, {wall|back})` (T profile + brackets), `car({railX})` (cabin + sling + guide shoes
++ safety gear: `.userData.setGrip(k)`, `.lever`, `.link`, `.front`, `.setDoors(k)`, `.hitchY`, `.govAttach`),
+`counterweight()`, `governor()` (`.setFly(k)`, `.setLatch(k)`), `tensionPulley()`, `person()` (`.arms`), `fist()`.
+`lib/35-gedung.js` — `BEDAH.gedung(S, {shaft, pit, floorH, floors, wing, holes})`: building cross-section
+around a lift shaft (pit + buffers, concrete walls, slabs with furniture, machine room, lobby with landing
+doors, call button, floor indicator); `stage.setCut(G.cut)` for the shaft, `G.lobby.visible = true` +
+`setCut(99)` for the lobby; `G.setDoors(k)`, `G.setCall(k)`, `G.setIndicator('G', ±1)`, `G.levels`, `G.mrY`.
+
+2D scenes inside a 3D film (a history flashback, a diagram): create a `<canvas>` in model.js, insert it in
+`#overlay` before `#bd-labels` (above the 3D, under titles and captions), draw it every frame from `t`, fade
+it with `style.opacity`. Sepia engraving look: a paper texture drawn once (stains, fibres, vignette), ink
+lines with a seeded 8 fps jitter ("boil"), diagonal hatching for shade. See `lift-bongkar/model.js`.
+SFX for machines and lifts: `creak` (wooden pulley), `rope`, `drip`, `breath`, `motor`, `strain` (overloaded
+motor with coughs), `glide`, `fray`, `snap`, `fall`, `spin` (governor), `klang`, `screech` (steel on rail),
+`chop` (axe), `gasp`, `cheer`, `ting` (lift chime), `door`.
 
 ## model.js contract
 
@@ -63,7 +146,7 @@ BEDAH.film(S => {
   the voice timeline (missing words are reported as a page error). `S.ramp(t, a, d)`, `S.on(t, a, b)`.
 - `stage`: `add(geo, mat, parent, pos, rot, edges=true)`, `C.<name>` materials, `room(o)`,
   `setCamera([x,y,z], zoom, yaw)`, `setCut(c)`, `toScreen(obj, p)`. Options before the film:
-  `window.BEDAH_OPTS = { cut: 'plane', camDir: [...], palette: {name: [hex, clipped]} }`.
+  `window.BEDAH_OPTS = { look: 'toon'|'clay', cut: 'wedge'|'plane', ground, camDir: [...], palette: {name: [hex, clipped]} }`.
 - Materials: clipped (cut by the cutaway, both faces) `shell grey steelClip darkClip copper brass
   blueClip redClip glass water`; solid (internals) `shellSolid greySolid steel dark ink copperSolid
   brassSolid yellow blue red green orange cream wood`. New colours go in `BEDAH_OPTS.palette`.

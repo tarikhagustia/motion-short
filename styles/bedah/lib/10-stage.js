@@ -33,16 +33,31 @@
     renderer.setSize(W, H, false);
     renderer.setClearColor(opts.ground ?? GROUND, 1);
     renderer.localClippingEnabled = true;
+    // look: 'toon' (default: flat 3-step shading + ink outlines) | 'clay' (soft, toy-like, shadows, no outlines)
+    const clay = opts.look === 'clay';
+    if (clay) { renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; }
 
     const scene = new THREE.Scene();
     const fh = opts.frustumH || 10;
     const camera = new THREE.OrthographicCamera(-fh * W / H / 2, fh * W / H / 2, fh / 2, -fh / 2, 0.1, 200);
     let camDir = new THREE.Vector3(...(opts.camDir || [1.0, 0.85, 1.25])).normalize();
 
-    scene.add(new THREE.HemisphereLight(0xffffff, 0xa8a49c, 0.62));
-    const sun = new THREE.DirectionalLight(0xffffff, 0.62);
+    const hemi = clay ? new THREE.HemisphereLight(0xfff6e8, 0xc4b39a, 0.95) : new THREE.HemisphereLight(0xffffff, 0xa8a49c, 0.62);
+    const sun = new THREE.DirectionalLight(clay ? 0xfff0da : 0xffffff, clay ? 0.8 : 0.62);
     sun.position.set(4, 9, 6);
-    scene.add(sun);
+    scene.add(hemi, sun);
+    if (clay) {
+      const r = opts.shadowSize ?? 10;
+      Object.assign(sun.shadow.camera, { left: -r, right: r, top: r, bottom: -r, near: 0.5, far: 40 });
+      sun.shadow.mapSize.set(opts.shadowMap ?? 1024, opts.shadowMap ?? 1024);
+      sun.shadow.bias = -0.0006; sun.shadow.radius = 5; sun.castShadow = true;
+      scene.add(sun.target);
+    }
+    const lightBase = [hemi.intensity, sun.intensity];
+    // setDim(k): 1 = normal, 0.3 = the house is dark (power cut)
+    function setDim(k) { hemi.intensity = lightBase[0] * k; sun.intensity = lightBase[1] * k; }
+    // setSky(color): background colour (storms, night)
+    function setSky(c) { renderer.setClearColor(c, 1); }
 
     // 3-step toon ramp from an RGBA canvas (a RedFormat DataTexture fails on some GPUs).
     const rc = document.createElement('canvas'); rc.width = 3; rc.height = 1;
@@ -64,6 +79,10 @@
     }
 
     function toon(color, clipped, extra = {}) {
+      if (clay) return new THREE.MeshStandardMaterial(Object.assign({
+        color, roughness: 0.82, metalness: 0, side: THREE.FrontSide,
+        clippingPlanes: clipped ? planes : [], clipIntersection: cutMode === 'wedge',
+      }, extra));
       return new THREE.MeshToonMaterial(Object.assign({
         color, gradientMap: ramp,
         side: THREE.FrontSide,
@@ -107,7 +126,9 @@
       if (rot) m.rotation.set(rot[0], rot[1], rot[2]);
       const clipped = !!(mat.clippingPlanes && mat.clippingPlanes.length);
       if (clipped && !mat.transparent) m.add(Object.assign(new THREE.Mesh(geo, insideOf(mat)), { userData: { inside: true } }));
-      if (edges) {
+      if (clay) {  // soft shadows instead of ink lines
+        if (!mat.transparent) { m.castShadow = true; m.receiveShadow = true; m.children.forEach(c => { c.receiveShadow = true; }); }
+      } else if (edges) {
         m.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 30), clipped ? edgeMatClip : edgeMat));
         if (!mat.transparent) m.add(Object.assign(new THREE.Mesh(geo, hullOf(mat)), { userData: { hull: true } }));
       }
@@ -151,7 +172,7 @@
       faces.forEach(([p, ry, sx]) => {
         const f = new THREE.Mesh(geo, m);
         f.position.set(...p); f.rotation.y = ry; f.scale.x = sx;
-        f.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 20), edgeMat));
+        if (!clay) f.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 20), edgeMat));
         g.add(f);
       });
       g.visible = cutNow <= 0.05;
@@ -161,13 +182,25 @@
     const _setCut = setCut;
     function setCutAll(c) { cutNow = c; _setCut(c); sections.forEach(g => { g.visible = c <= 0.05; }); }
 
-    // Camera: fixed isometric-style direction; a shot = target point + zoom (+ optional orbit yaw).
-    function setCamera(target, zoom, yaw = 0) {
+    // Camera: fixed isometric-style direction; a shot = target point + zoom (+ optional orbit yaw,
+    // pitch 0..1 toward straight top-down, shake [dx, dy] in world units along the screen axes).
+    function setCamera(target, zoom, yaw = 0, pitch = 0, shake = null) {
       const tgt = new THREE.Vector3().fromArray(target);
-      const d = camDir.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+      let d = camDir.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+      const pk = Math.min(Math.max(pitch, 0), 1);
+      if (pk > 0) d = d.lerp(new THREE.Vector3(0.0001, 1, 0.02), pk).normalize();
+      if (pitch < 0) {   // negative pitch: lower the camera toward eye level (look in under a ceiling)
+        const flat = new THREE.Vector3(d.x, 0, d.z).normalize(); flat.y = 0.06;
+        d = d.lerp(flat.normalize(), Math.min(-pitch, 1)).normalize();
+      }
       camera.position.copy(tgt).addScaledVector(d, 60);
-      camera.up.set(0, 1, 0);
+      camera.up.set(0, 1 - pk * 0.98, -pk).normalize();
       camera.lookAt(tgt);
+      if (shake) {
+        camera.updateMatrixWorld();
+        const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0), up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
+        camera.position.addScaledVector(right, shake[0]).addScaledVector(up, shake[1]);
+      }
       camera.zoom = zoom;
       camera.updateProjectionMatrix();
     }
@@ -179,7 +212,50 @@
       return [(tmp.x + 1) / 2 * W, (1 - tmp.y) / 2 * H];
     }
 
+    // Transparent cable along points, with glowing particles flowing inside:
+    //   const c = stage.cable([[x,y,z], ...], { r, parent, color });  c.flow(t, { speed, on, color, reach })
+    // speed ~ particle speed (negative = backwards), on = 0..1 (particles shrink away at 0),
+    // reach = 0..1 how far along the cable the particles get. c.grow(k) draws only the first k of it.
+    const flowMat = new THREE.MeshBasicMaterial({ color: 0xffd23f });
+    function cable(points, o = {}) {
+      const curve = new THREE.CatmullRomCurve3(points.map(p => new THREE.Vector3(...p)), false, 'catmullrom', 0.1);
+      const len = curve.getLength();
+      const r = o.r ?? 0.045;
+      const seg = Math.max(24, Math.round(len * 24));
+      const geo = new THREE.TubeGeometry(curve, seg, r, 10, false);
+      const mat = toon(o.color ?? 0xf6f1e6, !!o.clip, { transparent: true, opacity: o.opacity ?? 0.42, depthWrite: false });
+      const mesh = new THREE.Mesh(geo, mat); (o.parent || scene).add(mesh);
+      const coreGeo = new THREE.TubeGeometry(curve, seg, r * 0.28, 6, false);
+      const core = new THREE.Mesh(coreGeo, toon(o.core ?? 0xb87333, !!o.clip)); (o.parent || scene).add(core);
+      const n = o.n ?? Math.max(4, Math.round(len * 3.5));
+      const pm = flowMat.clone(); if (o.particleColor !== undefined) pm.color.set(o.particleColor);
+      const parts = [];
+      for (let i = 0; i < n; i++) { const sp = new THREE.Mesh(new THREE.SphereGeometry(r * 0.62, 10, 8), pm); sp.renderOrder = 2; (o.parent || scene).add(sp); parts.push(sp); }
+      const tmpV = new THREE.Vector3();
+      return {
+        curve, mesh, core, parts, mat, pm, len,
+        grow(k) {
+          k = Math.max(0, Math.min(1, k));
+          geo.setDrawRange(0, Math.round(geo.index.count * k / 6) * 6);
+          coreGeo.setDrawRange(0, Math.round(coreGeo.index.count * k / 6) * 6);
+          mesh.visible = core.visible = k > 0;
+        },
+        flow(t, f = {}) {
+          const on = f.on ?? 1, sp = (f.speed ?? 1) / Math.max(len, 0.5), reach = f.reach ?? 1;
+          if (f.color !== undefined) pm.color.set(f.color);
+          parts.forEach((m, i) => {
+            const u = (((t * sp + i / n) % 1) + 1) % 1;
+            m.visible = on > 0.01 && u <= reach;
+            if (!m.visible) return;
+            curve.getPointAt(Math.min(u, 0.9999), tmpV); m.position.copy(tmpV);
+            m.scale.setScalar(on * (0.8 + 0.2 * Math.sin(t * 9 + i * 1.7)));
+          });
+        },
+      };
+    }
+
     return { W, H, renderer, scene, camera, C, toon, cloneMat, add, room, setCamera, setCut: setCutAll, section, toScreen, planes,
+      setDim, setSky, cable, clay, sun, hemi,
       render: () => renderer.render(scene, camera) };
   }
 
@@ -191,14 +267,16 @@
   // lathe([[r, y], ...]) — a turned profile (pots, bottles, knobs, nozzles)
   const lathe = (pts, seg = 64) => new THREE.LatheGeometry(pts.map(([r, y]) => new THREE.Vector2(r, y)), seg);
   // rounded box (bodies of devices)
-  function rbox(w, h, d, r = 0.08, depthSeg = 1) {
+  function rbox(w, h, d, r = 0.08, depthSeg = 1, bevel = 0) {
     const s = new THREE.Shape(), x = -w / 2, y = -h / 2;
     s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r);
     s.lineTo(x + w, y + h - r); s.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
     s.lineTo(x + r, y + h); s.quadraticCurveTo(x, y + h, x, y + h - r);
     s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y);
-    const g = new THREE.ExtrudeGeometry(s, { depth: d, bevelEnabled: false, steps: depthSeg, curveSegments: 6 });
-    g.translate(0, 0, -d / 2);
+    const g = new THREE.ExtrudeGeometry(s, bevel > 0
+      ? { depth: Math.max(d - 2 * bevel, 0.001), bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel * 0.9, bevelSegments: 3, steps: depthSeg, curveSegments: 6 }
+      : { depth: d, bevelEnabled: false, steps: depthSeg, curveSegments: 6 });
+    g.translate(0, 0, bevel > 0 ? -(d - 2 * bevel) / 2 : -d / 2);
     return g;
   }
   function gearGeo(r, teeth, toothDepth, depth = 0.05) {

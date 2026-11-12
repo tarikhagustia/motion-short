@@ -115,6 +115,14 @@ follows the words, (6) the object is everyday and cheap (kitchen, meteran, motor
   ["rahasia", "komentar."]). Title `Mau dicek rahasia *apa lagi?*`, the model back to the wide shot,
   closed again or slowly turning, badge `note` with `KOMENTAR`, a `pop` SFX on "komentar". Keep the
   wording, it is the series' sign-off. The upload text's question line uses the same ask.
+- **Seri "Ini namanya…" (variant)**: one set built up step by step (e.g. a cutaway house: kWh meter → MCB →
+  panel → grounding → ELCB → penangkal petir). Each beat = problem → fix → a one-beat pause → "… ini
+  namanya X" with the term said slower (write `… ini namanya… X` in `spoken`). No "Kok bisa? Kita cek
+  rahasianya."; the CTA scene stays last. Colour language held through the whole video: yellow
+  particles = normal current/flow, red + camera shake = danger, blue glint + bounce pop = the solution.
+  Loop: the hook opens on a close-up of the hero part and the closer pushes back into the same framing;
+  the CTA plays over that held close-up, so the last frame still matches the first. A dramatic beat may
+  cut the music (`music_mute`) and leave silence after its click. Template: `projects/listrik-rumah-aman/`.
 - **Honesty**: numbers on the readout that no source gives are illustration only; never say them.
   Safety advice (pressure cookers, electricity) must be conservative and sourced.
 

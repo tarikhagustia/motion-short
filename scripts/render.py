@@ -127,12 +127,16 @@ def build_html(proj, sb, tl):
     return out
 
 
+USE_CPU = False
+
+
 def open_page(html_path):
     from playwright.sync_api import sync_playwright
     pw = sync_playwright().start()
-    # WebGL (bedah) runs on SwiftShader in headless Chromium
-    browser = pw.chromium.launch(args=["--allow-file-access-from-files", "--disable-web-security",
-                                       "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"])
+    # WebGL (bedah): the real GPU through ANGLE/D3D11 (Windows) is many times faster than SwiftShader (CPU);
+    # --cpu falls back to SwiftShader (no GPU, or for comparing output)
+    gl = ["--enable-unsafe-swiftshader"] if USE_CPU else ["--use-angle=d3d11" if sys.platform == "win32" else "--use-angle=gl", "--enable-gpu"]
+    browser = pw.chromium.launch(args=["--allow-file-access-from-files", "--disable-web-security", "--ignore-gpu-blocklist", *gl])
     page = browser.new_page(viewport={"width": 1080, "height": 1920}, device_scale_factor=1)
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
@@ -221,9 +225,12 @@ def main():
     ap.add_argument("--music", help="optional background music file (looped, ducked to --music-volume)")
     ap.add_argument("--music-volume", type=float, default=0.22)
     ap.add_argument("--no-music", action="store_true", help="ignore audio/music.wav")
+    ap.add_argument("--cpu", action="store_true", help="WebGL on SwiftShader (CPU) instead of the GPU")
     ap.add_argument("--sfx-volume", type=float, default=0.9)
     ap.add_argument("--remux", action="store_true", help="only redo the audio mix on the last rendered frames (fast)")
     args = ap.parse_args()
+    global USE_CPU
+    USE_CPU = args.cpu
 
     proj = Path(args.project).resolve()
     sb = json.loads((proj / "storyboard.json").read_text(encoding="utf-8"))
